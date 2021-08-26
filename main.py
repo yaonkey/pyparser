@@ -6,7 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 
-SELENIUM_PATH = ""
+SELENIUM_PATH = "./assets/"
 FILENAME = "lesmastyle"
 PRODUCT_TYPE = "Арка"
 
