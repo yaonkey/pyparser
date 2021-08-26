@@ -5,8 +5,12 @@ import csv
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
+import os
 
-SELENIUM_PATH = "./assets/"
+if os.name == "nt":
+    SELENIUM_PATH = "assets\\geckodriver.exe"
+elif os.name == 'posix':
+    SELENIUM_PATH = "./assets/geckodriver"
 FILENAME = "lesmastyle"
 PRODUCT_TYPE = "Арка"
 
@@ -40,7 +44,7 @@ class SiteParser:
 
     def run(self):
         resp = requests.get(self.url)
-        driver = webdriver.Firefox(SELENIUM_PATH)
+        driver = webdriver.Firefox(executable_path=rf'{SELENIUM_PATH}')
         driver.get(self.url)
         html = driver.page_source
         self.soup = bs(html, "lxml")
@@ -74,7 +78,7 @@ class SiteParser:
         return bs(requests.get(self.url).text, "lxml")
 
 
-delo = 1
+delo = 0
 if delo == 1:
     for url in site_urls:
         pars = SiteParser(url)  # one element for testing
