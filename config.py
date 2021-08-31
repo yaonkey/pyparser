@@ -9,7 +9,7 @@ else:
 FILENAME = "lesmastyle"
 PRODUCT_TYPE = "Арка"
 DEBUG = True
-IS_BROWSER_HIDE = False
+IS_BROWSER_HIDE = True
 
 SITE_URLS = [
     "https://lesmastyle.ru/shop/arki/ellada/",
