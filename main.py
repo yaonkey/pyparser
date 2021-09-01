@@ -5,13 +5,14 @@ from bs4 import BeautifulSoup as bs
 import csv
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
-from time import sleep, time
+from time import sleep, time, strftime
 from config import *
 import sys
 from random import choice
 
 
 class SiteParser:
+    sku_code: int = 0
     product: dict = {
         "name": '',
         "img": '',
@@ -59,8 +60,8 @@ class SiteParser:
     }
 
     def __init__(self, url: str == ""):
-        self.print_r('Init timer')
         self.__timer = time()
+        self.print_r('Init timer')
         if url != "":
             self.url = url
         options = Options()
@@ -81,40 +82,18 @@ class SiteParser:
     def __save(self):
         if DEBUG:
             self.print_r(f'Saving product sku: {self.product["sku"]} to {self._csv_filename}...')
-            self.save_columns = {
-                "Тип строки": "product_variant",
-                "Наименование": self.product["name"],
-                "Наименование артикула": self.product["sku"],
-                "Код артикула": "",
-                "Валюта": "RUB",
-                "ID артикула": "",
-                "Цена": self.product["price"],
-                "Доступен для заказа": "1",
-                "Зачеркнутая цена": "0",
-                "Закупочная цена": "0",
-                "В наличии": "1000",
-                "ID товара": "",
-                "Краткое описание": "",
-                "Описание": "",
-                "Наклейка": "",
-                "Статус": "",
-                "Выбор вариантов товара": "",
-                "Тип товаров": "",
-                "Теги": "",
-                "Облагается налогом": "",
-                "Заголовок": "",
-                "META Keywords": "",
-                "META Description": "",
-                "Ссылка на витрину": "",
-                "Адрес видео на YouTube или Vimeo": "",
-                "Дополнительные параметры": "",
-                "Изображения товаров": self.product["img"],
-                "Цвет": self.product["color"],
-                "Материал": self.product["material"],
-                "Высота": self.product["height"],
-                "Толщина": self.product["depth"],
-                "Ширина": self.product["width"]
-            }
+
+        self.sku_code += 1
+        self.save_columns['Наименование'] = self.product['name']
+        self.save_columns['Код артикула'] = self.sku_code
+        self.save_columns['Наименование артикула'] = self.product['sku']
+        self.save_columns['Цена'] = self.product['price']
+        self.save_columns['Изображения товаров'] = self.product['img']
+        self.save_columns['Цвет'] = self.product['color']
+        self.save_columns['Материал'] = self.product['material']
+        self.save_columns['Высота'] = self.product['height']
+        self.save_columns['Толщина'] = self.product['depth']
+        self.save_columns['Ширина'] = self.product['width']
 
         with open(self._csv_filename, "a", encoding='utf-8') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',')
@@ -128,24 +107,11 @@ class SiteParser:
             csv_writer.writerow(self.save_columns)
 
     def __process(self):
+        ttimer = time()
         product_div = self.__get_root_home_page()
         self.product["name"] = " ".join(f"{product_div.find('h2').get_text()}".split(" ")[0:2])
         self.product[
             'img'] = f"https://{FILENAME}.ru{product_div.find('a', {'data-fancybox': 'shop-item-photo'}).find('img')['src']}"
-        # self.product['material'] = [material.text.strip() for material in product_div.find_all('label', {
-        #     'for': [mid['id'] for mid in
-        #             product_div.find_all("input", {"type": "radio", "class": "custom-control-input"}) if
-        #             'colorType' in mid['id']]})]
-        # self.product["color"] = [color.text.strip() for color in product_div.find_all('label', {
-        #     'for': [mid['id'] for mid in
-        #             product_div.find_all("input", {"type": "radio", "class": "custom-control-input"}) if
-        #             'color' in mid['id'] and 'colorType' not in mid['id']]})]
-        # self.product["height"] = [height.text.strip() for height in
-        #                           product_div.find("select", {"id": "property_height"}).find_all("option")]
-        # self.product["width"] = [width.text.strip() for width in
-        #                          product_div.find("select", {"id": "property_width"}).find_all("option")]
-        # self.product["depth"] = [depth.text.strip() for depth in
-        #                          product_div.find("select", {"id": "property_wall_thickness"}).find_all("option")]
         self.product["sku"] = product_div.find_all("span", {"class": "text-danger"})[0].get_text().split(" ")[1]
         self.product["price"] = ''.join(
             [elem for elem in product_div.find_all("span", {"class": "text-danger"})[1].get_text().split(" ")[1] if
@@ -156,6 +122,7 @@ class SiteParser:
             self.__create_columns()
             self.__get_next_material_by_click()
         self.__save()
+        print(f"Product added for {self.toFixed(float(time() - ttimer), 2)} sec")
         return self.product
 
     def __get_page_from_url(self):
@@ -169,7 +136,7 @@ class SiteParser:
         #                     self.root_home_page.find_all("input",
         #                                                  {"type": "radio", "class": "custom-control-input"}) if
         #                     'colorType' in material['id']]
-        for element_button in material_buttons_ids[0:2]:
+        for element_button in material_buttons_ids:
             if 'colorType' in element_button.get_attribute('id'):
                 __button = self.driver.find_element_by_css_selector(
                     f'''label[for='{element_button.get_attribute("id")}']''')
@@ -261,13 +228,18 @@ class SiteParser:
         symb = choice(["-x", "--", "x-", "xx"])
         sys.stdout.write(f"\r[{symb}] {text}")
         sys.stdout.flush()
+        with open('./logs/work.log', 'a+', encoding='utf-8') as log_file:
+            log_file.write(f"\n[{strftime('%Y.%b.%d %X')} | {self.toFixed(time() - self.__timer, 3)}s]: {text}")
+
+    def toFixed(self, numObj, digits=0):
+        return f"{numObj:.{digits}f}"
 
     def __del__(self):
         self.print_r(f"Program close at {int(time() - self.__timer)} sec")
         self.driver.quit()
 
 
-delo = 0
+delo = 1
 pars = SiteParser(url="")
 if delo == 1:
     for url in SITE_URLS:
