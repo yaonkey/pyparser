@@ -9,6 +9,7 @@ from time import sleep, time, strftime, gmtime
 from config import *
 import sys
 from datetime import timedelta
+import logging
 
 
 class SiteParser:
@@ -61,6 +62,8 @@ class SiteParser:
 
     def __init__(self, url: str == "") -> None:
         self.__timer = time()
+        logging.basicConfig(filename=LOG_PATH+"debug.log", filemode='a', level=logging.DEBUG, encoding='utf-8',
+                            format='[%(asctime)s]: %(levelname)s | %(name)s | %(message)s', datefmt='%Y.%b.%d %H:%M:%S')
         self.print_r('Init timer')
         if url != "":
             self.url = url
@@ -113,7 +116,7 @@ class SiteParser:
         try:
             self.__get_next_material_by_click()
         except Exception as error:
-            self.print_r(f"{error}")
+            self.print_r(f"{error}", "ex")
 
     def __get_data(self) -> dict:
         """ Получение данных о товаре """
@@ -135,7 +138,7 @@ class SiteParser:
                 f"Product {self.product['name']} added for {self.float_to_fixed(float(time() - self.ttimer), 2)} sec")
             sleep(0.4)
         except Exception as error:
-            self.print_r(f"{error}")
+            self.print_r(f"{error}", "e")
         return self.product
 
     def __get_next_material_by_click(self) -> None:
@@ -144,18 +147,18 @@ class SiteParser:
         try:
             material_buttons_ids = self.driver.find_elements_by_css_selector("input[type=radio].custom-control-input")
             for element_button in material_buttons_ids:
-                if 'colorType' in element_button.get_attribute('id'):
+                if 'colorType' in element_button.get_attribute('id') and 'color' in element_button.get_attribute('id'):
                     __button = self.driver.find_element_by_css_selector(
                         f'''label[for='{element_button.get_attribute("id")}']''')
                     self.product['material'] = __button.text
-                    __button.click()
-                    sleep(3.5)
+                    # __button.click()
+                    # sleep(3.5)
                     self.__close_jivo()
                     self.__get_next_color_by_click()
                 else:
                     continue
         except Exception as error:
-            self.print_r(f"{error}")
+            self.print_r(f"{error}", "e")
 
     def __get_next_color_by_click(self) -> None:
         """ Переключение цвета продукта """
@@ -176,7 +179,7 @@ class SiteParser:
                 else:
                     continue
         except Exception as error:
-            self.print_r(f"{error}")
+            self.print_r(f"{error}", "e")
 
     def __get_next_height_by_click(self) -> None:
         """ Переключение высоты продукта """
@@ -192,7 +195,7 @@ class SiteParser:
                 self.__close_jivo()
                 self.__get_next_width_by_click()
         except Exception as error:
-            self.print_r(f"{error}")
+            self.print_r(f"{error}", "e")
 
     def __get_next_width_by_click(self) -> None:
         """ Переключение ширины продукта """
@@ -208,7 +211,7 @@ class SiteParser:
                 self.__close_jivo()
                 self.__get_next_depth_by_click()
         except Exception as error:
-            self.print_r(f"{error}")
+            self.print_r(f"{error}", "e")
 
     def __get_next_depth_by_click(self) -> None:
         """ Переключение толщины продукта """
@@ -224,7 +227,7 @@ class SiteParser:
                 self.__close_jivo()
                 self.__get_data()
         except Exception as error:
-            self.print_r(f"{error}")
+            self.print_r(f"{error}", "e")
 
     def __close_jivo(self) -> None:
         """ Закрытие бизнес-мессенджера Jivo """
@@ -240,12 +243,18 @@ class SiteParser:
         sleep(1)
         return self.root_home_page
 
-    def print_r(self, text: str) -> None:
+    def print_r(self, text: str, print_type: str = "i") -> None:
         """ Кастомный print и logger в одном методе timedelta(seconds=(time() - self.__timer))"""
         sys.stdout.write(f"\r[{strftime('%H:%M:%S', gmtime(time() - self.__timer))}]: {text}")
         sys.stdout.flush()
-        with open('./logs/work.log', 'a+', encoding='utf-8') as log_file:
-            log_file.write(f"\n[{strftime('%Y.%b.%d %X')} | {self.float_to_fixed(time() - self.__timer, 3)}s]: {text}")
+        if print_type == "i":
+            logging.info(text)
+        elif print_type == 'w':
+            logging.warning(text)
+        elif print_type == 'e':
+            logging.error(text)
+        elif print_type == 'ex':
+            logging.exception(text)
 
     def float_to_fixed(self, num_obj, digits=0) -> str:
         """ Для работы с double """
