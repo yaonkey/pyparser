@@ -5,9 +5,10 @@ from bs4 import BeautifulSoup as bs
 import csv
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
-from time import sleep, time, strftime, ctime
+from time import sleep, time, strftime, gmtime
 from config import *
 import sys
+from datetime import timedelta
 
 
 class SiteParser:
@@ -130,7 +131,8 @@ class SiteParser:
                  elem != '\xa0'])
             self.__close_jivo()
             self.__save()
-            self.print_r(f"Product {self.product['name']} added for {self.float_to_fixed(float(time() - self.ttimer), 2)} sec")
+            self.print_r(
+                f"Product {self.product['name']} added for {self.float_to_fixed(float(time() - self.ttimer), 2)} sec")
             sleep(0.4)
         except Exception as error:
             self.print_r(f"{error}")
@@ -239,8 +241,8 @@ class SiteParser:
         return self.root_home_page
 
     def print_r(self, text: str) -> None:
-        """ Кастомный print и logger в одном методе """
-        sys.stdout.write(f"\r[{ctime(self.__timer)}]: {text}")
+        """ Кастомный print и logger в одном методе timedelta(seconds=(time() - self.__timer))"""
+        sys.stdout.write(f"\r[{strftime('%H:%M:%S', gmtime(time() - self.__timer))}]: {text}")
         sys.stdout.flush()
         with open('./logs/work.log', 'a+', encoding='utf-8') as log_file:
             log_file.write(f"\n[{strftime('%Y.%b.%d %X')} | {self.float_to_fixed(time() - self.__timer, 3)}s]: {text}")
