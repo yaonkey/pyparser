@@ -60,13 +60,11 @@ class SiteParser:
         "Ширина": ""
     }
 
-    def __init__(self, url: str == "") -> None:
+    def __init__(self) -> None:
         self.__timer = time()
         logging.basicConfig(filename=LOG_PATH+"debug.log", filemode='a', level=logging.DEBUG, encoding='utf-8',
                             format='[%(asctime)s]: %(levelname)s | %(name)s | %(message)s', datefmt='%Y.%b.%d %H:%M:%S')
         self.print_r('Init timer')
-        if url != "":
-            self.url = url
         options = Options()
         options.headless = IS_BROWSER_HIDE
         self.driver = webdriver.Firefox(options=options, executable_path=rf'{SELENIUM_PATH}')
@@ -74,11 +72,11 @@ class SiteParser:
         self.__create_columns()
         self.print_r("Load configs...")
 
-    def run(self, url: str = "") -> None:
+    def run(self, url: list) -> None:
         """ Запуск """
         if url != "":
             self.url = url
-        self.driver.get(self.url)
+        self.driver.get(self.url[0])
         sleep(7)
         self.__get_root_home_page()
         self.__process()
@@ -114,7 +112,8 @@ class SiteParser:
     def __process(self) -> None:
         """ Обработчик """
         try:
-            self.__get_next_material_by_click()
+            self.__close_jivo()
+            self.__get_next_color_by_click()
         except Exception as error:
             self.print_r(f"{error}", "ex")
 
@@ -132,6 +131,7 @@ class SiteParser:
             self.product["price"] = ''.join(
                 [elem for elem in product_div.find_all("span", {"class": "text-danger"})[1].get_text().split(" ")[1] if
                  elem != '\xa0'])
+            self.product['material'] = self.url[1]
             self.__close_jivo()
             self.__save()
             self.print_r(
@@ -153,8 +153,7 @@ class SiteParser:
                     self.product['material'] = __button.text
                     # __button.click()
                     # sleep(3.5)
-                    self.__close_jivo()
-                    self.__get_next_color_by_click()
+
                 else:
                     continue
         except Exception as error:
@@ -267,9 +266,7 @@ class SiteParser:
 
 
 mode = 1
-pars = SiteParser(url="")
+pars = SiteParser()
 if mode == 1:
     for url in SITE_URLS:
         pars.run(url)
-elif mode == 0:
-    pars.run(SITE_URLS[0])
