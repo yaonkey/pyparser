@@ -62,7 +62,7 @@ class SiteParser:
 
     def __init__(self) -> None:
         self.__timer = time()
-        logging.basicConfig(filename=LOG_PATH+"debug.log", filemode='a', level=logging.DEBUG, encoding='utf-8',
+        logging.basicConfig(filename=LOG_PATH+"debug.log", filemode='a', level=logging.ERROR, encoding='utf-8',
                             format='[%(asctime)s]: %(levelname)s | %(name)s | %(message)s', datefmt='%Y.%b.%d %H:%M:%S')
         self.print_r('Init timer')
         options = Options()
