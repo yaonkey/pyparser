@@ -78,7 +78,7 @@ class SiteParser:
         """ Запуск """
         if url != "":
             self.url = url
-        self.driver.get(self.url[0])
+        self.driver.get(self.url)
         sleep(7)
         self.__get_root_home_page()
         self.__process()
@@ -88,10 +88,6 @@ class SiteParser:
         if DEBUG:
             self.print_r(f'Saving product sku: {self.product["sku"]} to {self._csv_filename}...')
 
-        mat1 = ["МДФ"]
-        mat2 = ["Белый ясень", "Дуб антик", "Дуб грей", "Капучино", "Светлый венге", "Эковенге"]
-        mat3 = ["Шпон дуба", "Шпон дуба лак", "Шпон красное дерево", "Шпон орех"]
-
         self.sku_code += 1
         self.save_columns['Наименование'] = self.product['name']
         self.save_columns['Код артикула'] = self.sku_code
@@ -99,14 +95,7 @@ class SiteParser:
         self.save_columns['Цена'] = self.product['price']
         self.save_columns['Изображения товаров'] = self.product['img']
         self.save_columns['Цвет'] = self.product['color']
-        if self.product['color'] in mat1:
-            self.save_columns['Материал'] = "Без отделки"
-        elif self.product['color'] in mat2:
-            self.save_columns['Материал'] = 'Экошпон'
-        elif self.product['color'] in mat3:
-            self.save_columns['Материал'] = 'Шпонированные'
-        else:
-            self.save_columns['Материал'] = "ПВХ"
+        self.save_columns['Материал'] = self.product['material']
         self.save_columns["Размер"] = self.product['size']
         self.save_columns['Высота'] = self.product['height']
         self.save_columns['Толщина'] = self.product['depth']
@@ -301,8 +290,6 @@ class SiteParser:
         self.driver.quit()
 
 
-mode = 1
 pars = SiteParser()
-if mode == 1:
-    for url in SITE_URLS:
-        pars.run(url)
+for url in SITE_URLS:
+    pars.run(url)
