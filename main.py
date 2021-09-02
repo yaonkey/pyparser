@@ -24,6 +24,7 @@ class SiteParser:
         "depth": '',
         "sku": '',
         "price": '',
+        'size': ''
     }
     save_columns: dict = {
         "Тип строки": "product_variant",
@@ -57,12 +58,13 @@ class SiteParser:
         "Материал": "",
         "Высота": "",
         "Толщина": "",
-        "Ширина": ""
+        "Ширина": "",
+        "Размер": ""
     }
 
     def __init__(self) -> None:
         self.__timer = time()
-        logging.basicConfig(filename=LOG_PATH+"debug.log", filemode='a', level=logging.ERROR, encoding='utf-8',
+        logging.basicConfig(filename=LOG_PATH + "debug.log", filemode='a', level=logging.ERROR, encoding='utf-8',
                             format='[%(asctime)s]: %(levelname)s | %(name)s | %(message)s', datefmt='%Y.%b.%d %H:%M:%S')
         self.print_r('Init timer')
         options = Options()
@@ -86,6 +88,10 @@ class SiteParser:
         if DEBUG:
             self.print_r(f'Saving product sku: {self.product["sku"]} to {self._csv_filename}...')
 
+        mat1 = ["МДФ"]
+        mat2 = ["Белый ясень", "Дуб антик", "Дуб грей", "Капучино", "Светлый венге", "Эковенге"]
+        mat3 = ["Шпон дуба", "Шпон дуба лак", "Шпон красное дерево", "Шпон орех"]
+
         self.sku_code += 1
         self.save_columns['Наименование'] = self.product['name']
         self.save_columns['Код артикула'] = self.sku_code
@@ -93,19 +99,27 @@ class SiteParser:
         self.save_columns['Цена'] = self.product['price']
         self.save_columns['Изображения товаров'] = self.product['img']
         self.save_columns['Цвет'] = self.product['color']
-        self.save_columns['Материал'] = self.product['material']
+        if self.product['color'] in mat1:
+            self.save_columns['Материал'] = "Без отделки"
+        elif self.product['color'] in mat2:
+            self.save_columns['Материал'] = 'Экошпон'
+        elif self.product['color'] in mat3:
+            self.save_columns['Материал'] = 'Шпонированные'
+        else:
+            self.save_columns['Материал'] = "ПВХ"
+        self.save_columns["Размер"] = self.product['size']
         self.save_columns['Высота'] = self.product['height']
         self.save_columns['Толщина'] = self.product['depth']
         self.save_columns['Ширина'] = self.product['width']
 
-        with open(self._csv_filename, "a", encoding='utf-8') as csv_file:
+        with open(self._csv_filename, "a", encoding='utf8') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',')
             csv_writer.writerow(self.save_columns.values())
 
     def __create_columns(self) -> None:
         """ Создание файла CSV """
         self.print_r(f"First init CSV file: {self._csv_filename}...")
-        with open(self._csv_filename, "w", encoding='utf-8') as csv_file:
+        with open(self._csv_filename, "w", encoding='utf8') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',')
             csv_writer.writerow(self.save_columns)
 
@@ -159,6 +173,27 @@ class SiteParser:
         except Exception as error:
             self.print_r(f"{error}", "e")
 
+    def __get_next_size_by_click(self) -> None:
+        """ Переключение размера продукта """
+        self.print_r("Getting next size...")
+        try:
+            color_buttons_ids = self.driver.find_elements_by_css_selector(
+                "input[type='radio'].custom-control-input")
+            for element_button in color_buttons_ids:
+                if 'partSizeList' in element_button.get_attribute('id'):
+                    __button = self.driver.find_element_by_css_selector(
+                        f'''label[for='{element_button.get_attribute("id")}']''')
+                    self.product['size'] = __button.text
+                    __button.click()
+                    sleep(3.5)
+                    self.__close_jivo()
+                    self.__get_next_color_by_click()
+                    self.__get_data()
+                else:
+                    continue
+        except Exception as error:
+            self.print_r(f"{error}", "e")
+
     def __get_next_color_by_click(self) -> None:
         """ Переключение цвета продукта """
         self.print_r("Getting next color...")
@@ -174,7 +209,8 @@ class SiteParser:
                     __button.click()
                     sleep(3.5)
                     self.__close_jivo()
-                    self.__get_next_height_by_click()
+                    # self.__get_next_height_by_click()
+                    self.__get_data()
                 else:
                     continue
         except Exception as error:
