@@ -12,7 +12,6 @@ else:
 FILENAME = "dveridk"
 PRODUCT_TYPE = "Двери"
 IS_BROWSER_HIDE = True
-
 SITE_URLS = [
     "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_lion_temnyy_orekh/",
     "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_milan_temnyy_orekh/",
