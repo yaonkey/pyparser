@@ -186,7 +186,7 @@ class SiteParser:
         """ Получение цены товара """
         self.print_r("Getting product price...")
         try:
-            self.product['price'] = self.driver.find_element_by_css_selector("span.price_value").text
+            self.product['price'] = ''.join(self.driver.find_element_by_css_selector("span.price_value").text.split(" "))
         except Exception as error:
             self.print_r(f"{error}", "e")
 
