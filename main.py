@@ -8,7 +8,6 @@ from selenium.webdriver.firefox.options import Options
 from time import sleep, time, strftime, gmtime
 from config import *
 import sys
-from datetime import timedelta
 import logging
 
 
@@ -24,10 +23,10 @@ class SiteParser:
         "depth": '',
         "sku": '',
         "price": '',
-        'size': ''
+        'size': '',
+        'opening': '',
     }
     save_columns: dict = {
-        "Тип строки": "product_variant",
         "Наименование": "",
         "Наименование артикула": "",
         "Код артикула": "",
@@ -44,7 +43,7 @@ class SiteParser:
         "Наклейка": "",
         "Статус": "",
         "Выбор вариантов товара": "",
-        "Тип товаров": "",
+        "Тип товаров": "Дверь",
         "Теги": "",
         "Облагается налогом": "",
         "Заголовок": "",
@@ -59,7 +58,8 @@ class SiteParser:
         "Высота": "",
         "Толщина": "",
         "Ширина": "",
-        "Размер": ""
+        "Размер": "",
+        "Открывание": "",
     }
 
     def __init__(self) -> None:
@@ -79,8 +79,6 @@ class SiteParser:
         if url != "":
             self.url = url
         self.driver.get(self.url)
-        sleep(7)
-        self.__get_root_home_page()
         self.__process()
 
     def __save(self) -> None:
@@ -100,6 +98,7 @@ class SiteParser:
         self.save_columns['Высота'] = self.product['height']
         self.save_columns['Толщина'] = self.product['depth']
         self.save_columns['Ширина'] = self.product['width']
+        self.save_columns['Открывание'] = self.product['opening']
 
         with open(self._csv_filename, "a", encoding='utf8') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',')
@@ -115,160 +114,112 @@ class SiteParser:
     def __process(self) -> None:
         """ Обработчик """
         try:
-            self.__close_jivo()
-            self.__get_next_color_by_click()
+            self.__get_next_size_by_click()
         except Exception as error:
-            self.print_r(f"{error}", "ex")
+            self.print_r(f"{error}", "e")
 
     def __get_data(self) -> dict:
         """ Получение данных о товаре """
         try:
             self.ttimer = time()
-            sleep(1)
-            product_div = self.__get_root_home_page()
-            self.product["name"] = " ".join(f"{product_div.find('h2').get_text()}".split(" ")[0:2])
-            self.print_r(f"Get product {self.product['name']} additional values...")
-            self.product[
-                'img'] = f"https://{FILENAME}.ru{product_div.find('a', {'data-fancybox': 'shop-item-photo'}).find('img')['src']}"
-            self.product["sku"] = product_div.find_all("span", {"class": "text-danger"})[0].get_text().split(" ")[1]
-            self.product["price"] = ''.join(
-                [elem for elem in product_div.find_all("span", {"class": "text-danger"})[1].get_text().split(" ")[1] if
-                 elem != '\xa0'])
-            self.product['material'] = self.url[1]
-            self.__close_jivo()
-            self.__save()
+            sleep(3)
+            self.__get_product_name()
+            self.__get_product_price()
+            self.__get_product_img()
+            self.__get_product_color()
+            self.__get_product_material()
+            self.__get_product_sku()
+            print(self.product)
+            # self.__save()
             self.print_r(
                 f"Product {self.product['name']} added for {self.float_to_fixed(float(time() - self.ttimer), 2)} sec")
-            sleep(0.4)
         except Exception as error:
             self.print_r(f"{error}", "e")
         return self.product
-
-    def __get_next_material_by_click(self) -> None:
-        """ Переключение материала продукта """
-        self.print_r("Getting next material...")
-        try:
-            material_buttons_ids = self.driver.find_elements_by_css_selector("input[type=radio].custom-control-input")
-            for element_button in material_buttons_ids:
-                if 'colorType' in element_button.get_attribute('id') and 'color' in element_button.get_attribute('id'):
-                    __button = self.driver.find_element_by_css_selector(
-                        f'''label[for='{element_button.get_attribute("id")}']''')
-                    self.product['material'] = __button.text
-                    # __button.click()
-                    # sleep(3.5)
-
-                else:
-                    continue
-        except Exception as error:
-            self.print_r(f"{error}", "e")
 
     def __get_next_size_by_click(self) -> None:
         """ Переключение размера продукта """
         self.print_r("Getting next size...")
         try:
-            color_buttons_ids = self.driver.find_elements_by_css_selector(
-                "input[type='radio'].custom-control-input")
-            for element_button in color_buttons_ids:
-                if 'partSizeList' in element_button.get_attribute('id'):
-                    __button = self.driver.find_element_by_css_selector(
-                        f'''label[for='{element_button.get_attribute("id")}']''')
-                    self.product['size'] = __button.text
-                    __button.click()
-                    sleep(3.5)
-                    self.__close_jivo()
-                    self.__get_next_color_by_click()
+            size_buttons = self.driver.find_elements_by_css_selector(
+                "ul.list_values_wrapper li")
+            for element_button in size_buttons:
+                if 'Размер' in element_button.get_attribute('title'):
+                    self.product['size'] = element_button.find_element_by_css_selector("span").text.split(" ")[0]
+                    element_button.click()
+                    self.__get_next_opening_by_click()
+        except Exception as error:
+            self.print_r(f"{error}", "e")
+
+    def __get_next_opening_by_click(self) -> None:
+        """ Переключение кнопки способа открывания """
+        self.print_r("Getting next opening side...")
+        try:
+            opening_buttons = self.driver.find_elements_by_css_selector(
+                "ul.list_values_wrapper li")
+            for element_button in opening_buttons:
+                if 'Открывание' in element_button.get_attribute('title'):
+                    self.product['opening'] = element_button.find_element_by_css_selector("span").text
+                    element_button.click()
                     self.__get_data()
-                else:
-                    continue
         except Exception as error:
             self.print_r(f"{error}", "e")
 
-    def __get_next_color_by_click(self) -> None:
-        """ Переключение цвета продукта """
-        self.print_r("Getting next color...")
+    def __get_product_name(self):
+        """ Получение наименование товара """
+        self.print_r("Getting product name...")
         try:
-            color_buttons_ids = self.driver.find_elements_by_css_selector(
-                "input[type='radio'].custom-control-input")
-            for element_button in color_buttons_ids:
-                if 'colorType' not in element_button.get_attribute('id') and 'color' in element_button.get_attribute(
-                        'id'):
-                    __button = self.driver.find_element_by_css_selector(
-                        f'''label[for='{element_button.get_attribute("id")}']''')
-                    self.product['color'] = __button.text
-                    __button.click()
-                    sleep(3.5)
-                    self.__close_jivo()
-                    # self.__get_next_height_by_click()
-                    self.__get_data()
-                else:
-                    continue
+            self.product['name'] = " ".join(
+                self.driver.find_element_by_css_selector("h1#pagetitle").text.split(" ")[:3])
         except Exception as error:
             self.print_r(f"{error}", "e")
 
-    def __get_next_height_by_click(self) -> None:
-        """ Переключение высоты продукта """
-        self.print_r("Getting next height value...")
+    def __get_product_sku(self):
+        """ Получение артикула товара """
+        self.print_r("Getting product sku...")
         try:
-            height_buttons_ids = self.driver.find_elements_by_css_selector(
-                "select#property_height option")
-            for element_button in height_buttons_ids:
-                __button = element_button
-                self.product['height'] = __button.text
-                __button.click()
-                sleep(3.5)
-                self.__close_jivo()
-                self.__get_next_width_by_click()
+            self.product[
+                'sku'] = f'''{''.join([e[0].upper() for e in self.product['name'].split(" ")])}-{self.product["size"].split("х")[0]}{self.product["opening"][0]}'''
         except Exception as error:
             self.print_r(f"{error}", "e")
 
-    def __get_next_width_by_click(self) -> None:
-        """ Переключение ширины продукта """
-        self.print_r("Getting next width value...")
+    def __get_product_price(self):
+        """ Получение цены товара """
+        self.print_r("Getting product price...")
         try:
-            width_buttons_ids = self.driver.find_elements_by_css_selector(
-                "select#property_width option")
-            for element_button in width_buttons_ids:
-                __button = element_button
-                self.product['width'] = __button.text
-                __button.click()
-                sleep(3.5)
-                self.__close_jivo()
-                self.__get_next_depth_by_click()
+            self.product['price'] = self.driver.find_element_by_css_selector("span.price_value").text
         except Exception as error:
             self.print_r(f"{error}", "e")
 
-    def __get_next_depth_by_click(self) -> None:
-        """ Переключение толщины продукта """
-        self.print_r("Getting next depth value...")
+    def __get_product_img(self):
+        """ Получение изображения товара """
+        self.print_r("Getting product image...")
         try:
-            depth_buttons_ids = self.driver.find_elements_by_css_selector(
-                "select#property_wall_thickness option")
-            for element_button in depth_buttons_ids:
-                __button = element_button
-                self.product['depth'] = __button.text
-                __button.click()
-                sleep(3.5)
-                self.__close_jivo()
-                self.__get_data()
+            self.product['img'] = self.driver.find_element_by_css_selector(
+                "a.popup_link.fancy_offer").get_attribute('href')
         except Exception as error:
             self.print_r(f"{error}", "e")
 
-    def __close_jivo(self) -> None:
-        """ Закрытие бизнес-мессенджера Jivo """
-        self.driver.execute_script('''$("div.jivo-iframe-container").remove();''')
-        self.driver.execute_script('''$("jdiv").remove();''')
-        sleep(0.5)
+    def __get_product_color(self):  # try it
+        """ Получение цвета товара """
+        self.print_r("Getting product color...")
+        try:
+            __parent = self.driver.find_elements_by_css_selector('div.detail_text div.row p.col-md-4')
+            self.product['color'] = __parent[-1].text.split(":")[1].split(";")[0].strip()
+        except Exception as error:
+            self.print_r(f"{error}", "e")
 
-    def __get_root_home_page(self) -> any:
-        """ Получение HTML-страницы текущего url """
-        self.html = self.driver.page_source
-        self.soup = bs(self.html, "lxml")
-        self.root_home_page = self.soup.find('div', {"class", "home"})
-        sleep(1)
-        return self.root_home_page
+    def __get_product_material(self):  # try it
+        """ Получение материала товара """
+        self.print_r("Getting product material...")
+        try:
+            __parent = self.driver.find_elements_by_css_selector('div.detail_text div.row p.col-md-4')
+            self.product['material'] = __parent[4].text.split(" ")[2]
+        except Exception as error:
+            self.print_r(f"{error}", "e")
 
     def print_r(self, text: str, print_type: str = "i") -> None:
-        """ Кастомный print и logger в одном методе timedelta(seconds=(time() - self.__timer))"""
+        """ Кастомный print и logger в одном методе """
         sys.stdout.write(f"\r[{strftime('%H:%M:%S', gmtime(time() - self.__timer))}]: {text}")
         sys.stdout.flush()
         if print_type == "i":
