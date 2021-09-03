@@ -12,7 +12,6 @@ import logging
 
 
 class SiteParser:
-    sku_code: int = 0
     product: dict = {
         "name": '',
         "img": '',
@@ -25,6 +24,7 @@ class SiteParser:
         "price": '',
         'size': '',
         'opening': '',
+        'sku_code': 1,
     }
     save_columns: dict = {
         "Наименование": "",
@@ -85,9 +85,9 @@ class SiteParser:
         """ Сохранение в CSV """
         self.print_r(f'Saving product sku: {self.product["sku"]} to {self._csv_filename}...')
 
-        self.sku_code += 1
+        self.product['sku_code'] += 1
         self.save_columns['Наименование'] = self.product['name']
-        self.save_columns['Код артикула'] = self.sku_code
+        self.save_columns['Код артикула'] = self.product['sku_code']
         self.save_columns['Наименование артикула'] = self.product['sku']
         self.save_columns['Цена'] = self.product['price']
         self.save_columns['Изображения товаров'] = self.product['img']
