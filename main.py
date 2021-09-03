@@ -129,8 +129,7 @@ class SiteParser:
             self.__get_product_color()
             self.__get_product_material()
             self.__get_product_sku()
-            print(self.product)
-            # self.__save()
+            self.__save()
             self.print_r(
                 f"Product {self.product['name']} added for {self.float_to_fixed(float(time() - self.ttimer), 2)} sec")
         except Exception as error:
@@ -165,7 +164,7 @@ class SiteParser:
         except Exception as error:
             self.print_r(f"{error}", "e")
 
-    def __get_product_name(self):
+    def __get_product_name(self) -> None:
         """ Получение наименование товара """
         self.print_r("Getting product name...")
         try:
@@ -174,16 +173,16 @@ class SiteParser:
         except Exception as error:
             self.print_r(f"{error}", "e")
 
-    def __get_product_sku(self):
+    def __get_product_sku(self) -> None:
         """ Получение артикула товара """
         self.print_r("Getting product sku...")
         try:
             self.product[
-                'sku'] = f'''{''.join([e[0].upper() for e in self.product['name'].split(" ")])}-{self.product["size"].split("х")[0]}{self.product["opening"][0]}'''
+                'sku'] = f'''ВД-{''.join([c[:2] for c in self.product['name'].split(" ")[2]][:3])}-{self.product["size"].split("х")[0]}{self.product["opening"][0]}'''
         except Exception as error:
             self.print_r(f"{error}", "e")
 
-    def __get_product_price(self):
+    def __get_product_price(self) -> None:
         """ Получение цены товара """
         self.print_r("Getting product price...")
         try:
@@ -191,7 +190,7 @@ class SiteParser:
         except Exception as error:
             self.print_r(f"{error}", "e")
 
-    def __get_product_img(self):
+    def __get_product_img(self) -> None:
         """ Получение изображения товара """
         self.print_r("Getting product image...")
         try:
@@ -200,7 +199,7 @@ class SiteParser:
         except Exception as error:
             self.print_r(f"{error}", "e")
 
-    def __get_product_color(self):  # try it
+    def __get_product_color(self) -> None:
         """ Получение цвета товара """
         self.print_r("Getting product color...")
         try:
@@ -209,12 +208,11 @@ class SiteParser:
         except Exception as error:
             self.print_r(f"{error}", "e")
 
-    def __get_product_material(self):  # try it
+    def __get_product_material(self) -> None:
         """ Получение материала товара """
         self.print_r("Getting product material...")
         try:
-            __parent = self.driver.find_elements_by_css_selector('div.detail_text div.row p.col-md-4')
-            self.product['material'] = __parent[4].text.split(" ")[2]
+            self.product['material'] = 'МДФ'
         except Exception as error:
             self.print_r(f"{error}", "e")
 
