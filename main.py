@@ -177,7 +177,7 @@ class SiteParser:
         self.print_r("Getting product sku...")
         try:
             self.product[
-                'sku'] = f'''ВД-{''.join([c[:2] for c in self.product['name'].split(" ")[2]][:3])}-{self.product["size"].split("х")[0]}{self.product["opening"][0]}'''
+                'sku'] = f'''ВД-{''.join([c[:2] for c in self.product['name'].split(" ")[2]][:3])}-{self.product["size"].split("х")[0]}{self.product["opening"][0]}{self.product["color"][0]}'''
         except Exception as error:
             self.print_r(f"{error}", "e")
 
@@ -185,7 +185,8 @@ class SiteParser:
         """ Получение цены товара """
         self.print_r("Getting product price...")
         try:
-            self.product['price'] = ''.join(self.driver.find_element_by_css_selector("span.price_value").text.split(" "))
+            self.product['price'] = ''.join(
+                self.driver.find_element_by_css_selector("span.price_value").text.split(" "))
         except Exception as error:
             self.print_r(f"{error}", "e")
 
@@ -202,8 +203,8 @@ class SiteParser:
         """ Получение цвета товара """
         self.print_r("Getting product color...")
         try:
-            __parent = self.driver.find_elements_by_css_selector('div.detail_text div.row p.col-md-4')
-            self.product['color'] = __parent[-1].text.split(":")[1].split(";")[0].strip()
+            self.product['color'] = " ".join(
+                self.driver.find_element_by_css_selector("h1#pagetitle").text.split(" ")[3:])
         except Exception as error:
             self.print_r(f"{error}", "e")
 
