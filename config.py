@@ -11,7 +11,6 @@ else:
     LOG_PATH = str(input("Enter path for logs: "))
 FILENAME = "dveridk"
 PRODUCT_TYPE = "Двери"
-DEBUG = True
 IS_BROWSER_HIDE = True
 
 SITE_URLS = [

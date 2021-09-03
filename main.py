@@ -83,8 +83,7 @@ class SiteParser:
 
     def __save(self) -> None:
         """ Сохранение в CSV """
-        if DEBUG:
-            self.print_r(f'Saving product sku: {self.product["sku"]} to {self._csv_filename}...')
+        self.print_r(f'Saving product sku: {self.product["sku"]} to {self._csv_filename}...')
 
         self.sku_code += 1
         self.save_columns['Наименование'] = self.product['name']
