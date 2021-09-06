@@ -5,34 +5,24 @@ if os.name == "nt":
     LOG_PATH = "logs\\"
 elif os.name == 'posix':
     SELENIUM_PATH = "./assets/geckodriver"
-    LOG_PATH = './logs/debug.log'
+    LOG_PATH = './logs/'
 else:
     SELENIUM_PATH = str(input("Enter path to Selenium: "))
     LOG_PATH = str(input("Enter path for logs: "))
-FILENAME = "dveridk"
-PRODUCT_TYPE = "Двери"
+FILENAME = "vk"
+PRODUCT_TYPE = ""
 IS_BROWSER_HIDE = True
 SITE_URLS = [
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_lion_temnyy_orekh/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_milan_temnyy_orekh/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_porta_temnyy_orekh/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_novello_albero_brash/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_termal_venge/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_termal_belenyy_dub/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_konsul_belenyy_dub/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_florentsiya_zolotoy_dub/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_florentsiya_temnyy_orekh/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_florentsiya_belenyy_dub/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_termal_ekstra_venge/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_termal_ekstra_listvennitsa_bezhevaya/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_siti_z3k_venge/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_siti_z3k_belenyy_dub/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_termal_ultra_venge/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_termal_ultra_belenyy_dub/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_siti_s3k_belenyy_dub/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_siti_s3k_listvennitsa_seraya/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_siti_3k_venge/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_siti_3k_belenyy_dub/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_rubikon_100_tsarga_sandal_belyy/",
-    "https://dveridk.ru/catalog/vkhodnye_metallicheskie_dveri/vkhodnaya_dver_rubikon_100_tsarga_venge/"
+    ["https://vk.com/market-161176754?section=album_13&w=product-161176754_4978986%2Fquery", "Изделия из эпоксидной смолы"],
+    ["https://vk.com/market-161176754?section=album_11&w=product-161176754_3695971%2Fquery", "Одежда для игрушек"],
+    ["https://vk.com/market-161176754?section=album_10&w=product-161176754_4684104%2Fquery", "Брелоки"],
+    ["https://vk.com/market-161176754?section=album_9&w=product-161176754_4161835%2Fquery", "Товары для животных"],
+    ["https://vk.com/market-161176754?section=album_8&w=product-161176754_4266881%2Fquery", "Одежда"],
+    ["https://vk.com/market-161176754?section=album_7&w=product-161176754_4005306%2Fquery", "Пледы"],
+    ["https://vk.com/market-161176754?section=album_2&w=product-161176754_3512818%2Fquery", "Фенечки"],
+    ["https://vk.com/market-161176754?section=album_4&w=product-161176754_5009238%2Fquery", "Вязаные игрушки"],
+    ["https://vk.com/market-161176754?section=album_2&w=product-161176754_3512818%2Fquery", "Ловцы снов"],
+    ["https://vk.com/market-161176754?section=album_6&w=product-161176754_3578119%2Fquery", "Вязаные чехлы"],
+    ["https://vk.com/market-161176754?section=album_3&w=product-161176754_4266883%2Fquery", "Нашивки"],
+    ["https://vk.com/uslugi-161176754?section=album_14&w=product-161176754_5009536%2Fquery", "Описания"],
 ]
