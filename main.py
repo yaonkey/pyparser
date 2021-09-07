@@ -46,6 +46,7 @@ class SiteParser:
         "Размер": "",
         "Открывание": "",
         "Тип товаров": "",
+        "Остекление": "",
     }
     __first_iter = True
     __sku_code = 0
@@ -75,7 +76,7 @@ class SiteParser:
         self.product: dict = {
             "name": '',
             "img": '',
-            "color": '',
+            "color": [],
             "material": '',
             "height": '',
             "width": '',
@@ -84,7 +85,8 @@ class SiteParser:
             "price": '',
             'size': [],
             'opening': [],
-            'description': ''
+            'description': '',
+            'glass': [],
         }
         if url != "":
             self.url = url
@@ -109,25 +111,29 @@ class SiteParser:
         self.save_columns['Тип товаров'] = self.url[1]
         self.save_columns['Открывание'] = self.product["opening"]
         self.save_columns['Размер'] = self.product['size']
+        self.save_columns['Открывание'] = self.product['opening']
         self.save_columns['Цвет'] = self.product['color']
         self.save_columns['Материал'] = self.product['material']
+        self.save_columns['Остекление'] = self.product['glass']
 
         with open(self._csv_filename, "a", encoding='utf8') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',')
             csv_writer.writerow(self.save_columns.values())
 
         if len(self.product['size']) > 1 or len(self.product['opening']) > 1:
-            for a in range(0, len(self.product['opening'])):
+            for a in range(0, len(self.product['color'])):
                 for b in range(0, len(self.product['size'])):
-                    self.save_columns['Открывание'] = self.product['opening'][a]
-                    self.save_columns['Размер'] = self.product['size'][b]
-                    self.__sku_code += 1
-                    self.save_columns['Код артикула'] = f"{self.product['name'][:3]}-{self.__sku_code}"
-                    self.save_columns['ID артикула'] = self.__sku_code
-                    self.save_columns['Наименование артикула'] = f"{self.product['sku']}-{self.__sku_code}"
-                    with open(self._csv_filename, "a", encoding='utf8') as csv_file:
-                        csv_writer = csv.writer(csv_file, delimiter=',')
-                        csv_writer.writerow(self.save_columns.values())
+                    for c in range(0, len(self.product['glass'])):
+                        self.save_columns['Цвет'] = self.product['color'][a]
+                        self.save_columns['Размер'] = self.product['size'][b]
+                        self.save_columns['Остекление'] = self.product['glass'][c]
+                        self.__sku_code += 1
+                        self.save_columns['Код артикула'] = f"{self.url[1][:2]}-{self.product['name'][:3]}-{self.product['color'][:2]}-{self.__sku_code}".upper()
+                        self.save_columns['ID артикула'] = self.__sku_code
+                        self.save_columns['Наименование артикула'] = f"{self.product['sku']}-{self.__sku_code}"
+                        with open(self._csv_filename, "a", encoding='utf8') as csv_file:
+                            csv_writer = csv.writer(csv_file, delimiter=',')
+                            csv_writer.writerow(self.save_columns.values())
 
         if self.__current_iteration <= MAX_PRODUCTS_ON_ONE_PAGE:
             self.run(self.url)
@@ -156,11 +162,12 @@ class SiteParser:
             self.__first_iter = False
             sleep(6)
             self.__get_product_name()
+            self.__get_product_glass_and_color()
             self.__get_product_price()
             self.__get_product_img()
             self.__get_product_description()
             self.__get_product_sku()
-            self.__get_product_size_and_opening()
+            self.__get_product_size()
             self.__save()
             self.print_r(
                 f"Product {self.product['name']} added for {self.float_to_fixed(float(time() - self.ttimer), 2)} sec")
@@ -175,7 +182,7 @@ class SiteParser:
             sleep(3)
             self.__close_jivo()
             product_button = self.driver.find_elements_by_css_selector(
-                "div.information_wrapper div.left div.name a")
+                "div.catalog.horizont ul li.catalog_item a")
             if self.__current_iteration <= 1:
                 for __product in product_button:
                     __product.click()
@@ -194,9 +201,8 @@ class SiteParser:
         """ Получение наименование товара """
         self.print_r("Getting product name...")
         try:
-            __name = self.driver.find_element_by_css_selector("div.heading_title div.container h1").text.split(" (")
+            __name = self.driver.find_element_by_css_selector("div.name-articul span.name").text.split(" (")
             self.product['name'] = __name[0]
-            self.product['color'] = __name[1].split(")")[0]
         except Exception as error:
             self.print_r(f"{error}", "e")
 
@@ -204,11 +210,18 @@ class SiteParser:
         """ Получение артикула товара """
         self.print_r("Getting product sku...")
         try:
-            __article = self.driver.find_elements_by_css_selector('div.description span.contrast_font.display-block')
-            for __elem in __article:
-                if "Артикул" in __elem.text:
-                    self.product['sku'] = __elem.text.split(":")[1]
-                    break
+            __article = self.driver.find_element_by_css_selector('div.name-articul span.item-articul span[itemprop="sku"]').text
+            self.product['sku'] = __article.text.split("\xa0")[1]
+        except Exception as error:
+            self.print_r(f"{error}", "e")
+
+    def __get_product_glass_and_color(self) -> None:
+        """ Получение остекления продукта и цвета """
+        self.print_r("Getting product glass and color...")
+        try:
+            __parent = self.driver.find_element_by_css_selector("div.name-articul span.name span").text.split(", ")
+            self.product['color'] = (__parent[1].split(" ")[0]).capitalize()
+            self.product['glass'] = (__parent[0]).capitalize()
         except Exception as error:
             self.print_r(f"{error}", "e")
 
@@ -217,7 +230,7 @@ class SiteParser:
         self.print_r("Getting product price...")
         try:
             self.product['price'] = \
-                self.driver.find_element_by_css_selector("span.autocalc-product-price").text.split(" ")[0]
+                self.driver.find_element_by_css_selector("div.cost_set p").text.split(" ")[0]
         except Exception as error:
             self.print_r(f"{error}", "e")
 
@@ -225,17 +238,13 @@ class SiteParser:
         """ Получение описания товара """
         self.print_r("Getting product description...")
         try:
-            __parent = self.driver.find_elements_by_css_selector(
-                'div.us-product-attr div.us-product-attr-cont div.us-product-attr-item')
+            __parent = self.driver.find_element_by_css_selector(
+                'div.tabs__content.active.clearfix div.option p').text.split("<br>")
             __desc: list = []
             for __child in __parent:
-                __items = []
-                __items_in_child = __child.find_elements_by_css_selector('span')
-                for __i_child in __items_in_child:
-                    if 'Материал' in __i_child.text:
-                        self.product['material'] = __items_in_child[1].text
-                    __items.append(__i_child.text)
-                __desc.append(' '.join(__items))
+                if 'Материал' in __child.strip():
+                    self.product['material'] = __child.strip().split(": ")[1]
+                __desc.append(__child.strip())
             self.product['description'] = '. '.join(__desc)
         except Exception as error:
             self.print_r(f"{error}", "e")
@@ -244,21 +253,18 @@ class SiteParser:
         """ Получение изображений товара """
         self.print_r("Getting product image...")
         try:
-            self.product['img'] = self.driver.find_element_by_css_selector('div.image a img').get_attribute('src')
+            self.product['img'] = self.driver.find_element_by_css_selector('div.photo img').get_attribute('src')
         except Exception as error:
             self.print_r(f"{error}", "e")
 
-    def __get_product_size_and_opening(self) -> None:
-        """ Получение размера товара и открытия двери """
-        self.print_r("Getting product size and opening mode...")
+    def __get_product_size(self) -> None:
+        """ Получение размера товара """
+        self.print_r("Getting product size...")
         try:
             __parent = self.driver.find_elements_by_css_selector(
-                "div.product-options.options_btn.options.contrast_font div.form-group div div.radio")
+                "div.size_item ul.size li").text
             for __child in __parent:
-                __input_id = __child.find_element_by_css_selector("input").get_attribute("id")
-                __child_elem = __child.find_element_by_css_selector(f'label[for="{__input_id}"]').text
-                self.product['size'].append(__child_elem.split(",")[0])
-                self.product['opening'].append('Левое' if "Левое" in __child_elem else "Правое")
+                self.product['size'].append(__child)
         except Exception as error:
             self.print_r(f"{error}", "e")
 
