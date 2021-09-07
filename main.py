@@ -161,12 +161,7 @@ class SiteParser:
             self.ttimer = time()
             self.__first_iter = False
             sleep(6)
-            self.__get_product_name()
-            self.__get_product_price()
-            self.__get_product_img()
-            self.__get_product_description()
-            self.__get_product_sku()
-            self.__get_product_size()
+            self.__get_next_variation()
             self.__save()
             self.print_r(
                 f"Product {self.product['name']} added for {self.float_to_fixed(float(time() - self.ttimer), 2)} sec")
@@ -196,6 +191,16 @@ class SiteParser:
         except Exception as error:
             self.print_r(f"{error}", "e")
 
+    def __get_next_variation(self) -> None:
+        """ Получение следующего артикула товара """
+        self.__get_product_name()
+        self.__get_product_price()
+        self.__get_product_img()
+        self.__get_product_description()
+        self.__get_product_sku()
+        self.__get_product_glass_and_color()
+        self.__get_product_size()
+
     def __get_product_name(self) -> None:
         """ Получение наименование товара """
         self.print_r("Getting product name...")
@@ -218,6 +223,7 @@ class SiteParser:
         """ Получение остекления продукта и цвета """
         self.print_r("Getting product glass and color...")
         try:
+            sleep(6)
             __parent = self.driver.find_element_by_css_selector("div.name-articul span.name span")
             self.product['color'] = (__parent.text.split(", ")[1].split(" ")[0]).capitalize()
             self.product['glass'] = (__parent.text.split(", ")[0]).capitalize()
@@ -260,12 +266,12 @@ class SiteParser:
         """ Получение размера товара """
         self.print_r("Getting product size...")
         try:
+            sleep(6)
             __parent = self.driver.find_elements_by_css_selector(
                 "div.size_item ul.size li")
             for __child in __parent:
                 self.product['size'].append(__child.text)
                 __child.click()
-                self.__get_product_glass_and_color()
         except Exception as error:
             self.print_r(f"{error}", "e")
 
