@@ -121,6 +121,10 @@ class SiteParser:
                 for b in range(0, len(self.product['size'])):
                     self.save_columns['Открывание'] = self.product['opening'][a]
                     self.save_columns['Размер'] = self.product['size'][b]
+                    self.__sku_code += 1
+                    self.save_columns['Код артикула'] = f"{self.product['name'][:3]}-{self.__sku_code}"
+                    self.save_columns['ID артикула'] = self.__sku_code
+                    self.save_columns['Наименование артикула'] = f"{self.product['sku']}-{self.__sku_code}"
                     with open(self._csv_filename, "a", encoding='utf8') as csv_file:
                         csv_writer = csv.writer(csv_file, delimiter=',')
                         csv_writer.writerow(self.save_columns.values())
