@@ -162,7 +162,6 @@ class SiteParser:
             self.__first_iter = False
             sleep(6)
             self.__get_product_name()
-            self.__get_product_glass_and_color()
             self.__get_product_price()
             self.__get_product_img()
             self.__get_product_description()
@@ -219,9 +218,9 @@ class SiteParser:
         """ Получение остекления продукта и цвета """
         self.print_r("Getting product glass and color...")
         try:
-            __parent = self.driver.find_element_by_css_selector("div.name-articul span.name span").text.split(", ")
-            self.product['color'] = (__parent[1].split(" ")[0]).capitalize()
-            self.product['glass'] = (__parent[0]).capitalize()
+            __parent = self.driver.find_element_by_css_selector("div.name-articul span.name span")
+            self.product['color'] = (__parent.text.split(", ")[1].split(" ")[0]).capitalize()
+            self.product['glass'] = (__parent.text.split(", ")[0]).capitalize()
         except Exception as error:
             self.print_r(f"{error}", "e")
 
@@ -262,9 +261,11 @@ class SiteParser:
         self.print_r("Getting product size...")
         try:
             __parent = self.driver.find_elements_by_css_selector(
-                "div.size_item ul.size li").text
+                "div.size_item ul.size li")
             for __child in __parent:
-                self.product['size'].append(__child)
+                self.product['size'].append(__child.text)
+                __child.click()
+                self.__get_product_glass_and_color()
         except Exception as error:
             self.print_r(f"{error}", "e")
 
