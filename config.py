@@ -13,12 +13,12 @@ FILENAME = "luxor-dveri"
 PRODUCT_TYPE = "Дверь"
 IS_BROWSER_HIDE = True
 SITE_URLS = [
-    ["https://luxor-dveri.ru/catalog/mezhkomnatnye-dveri/", "Дверь"],
-    ["https://luxor-dveri.ru/catalog/mezhkomnatnye-dveri/?PAGEN_1=2", "Дверь"],
-    ["https://luxor-dveri.ru/catalog/mezhkomnatnye-dveri/?PAGEN_1=3", "Дверь"],
-    ["https://luxor-dveri.ru/catalog/mezhkomnatnye-dveri/?PAGEN_1=4", "Дверь"],
-    ["https://luxor-dveri.ru/catalog/mezhkomnatnye-dveri/?PAGEN_1=5", "Дверь"],
-    ["https://luxor-dveri.ru/catalog/mezhkomnatnye-dveri/?PAGEN_1=6", "Дверь"],
+    ["https://luxor-dveri.ru/catalog/mezhkomnatnye-dveri/?VID=VERTICAL", "Дверь"],
+    ["https://luxor-dveri.ru/catalog/mezhkomnatnye-dveri/?VID=VERTICAL&PAGEN_1=2", "Дверь"],
+    ["https://luxor-dveri.ru/catalog/mezhkomnatnye-dveri/?VID=VERTICAL&PAGEN_1=3", "Дверь"],
+    ["https://luxor-dveri.ru/catalog/mezhkomnatnye-dveri/?VID=VERTICAL&PAGEN_1=4", "Дверь"],
+    ["https://luxor-dveri.ru/catalog/mezhkomnatnye-dveri/?VID=VERTICAL&PAGEN_1=5", "Дверь"],
+    ["https://luxor-dveri.ru/catalog/mezhkomnatnye-dveri/?VID=VERTICAL&PAGEN_1=6", "Дверь"],
 ]
 MAX_PAGE_COUNT = 6
 MAX_PRODUCTS_ON_ONE_PAGE = 28
