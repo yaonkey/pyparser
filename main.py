@@ -100,7 +100,7 @@ class SiteParser:
         self.print_r(f'Saving product sku: {self.product["sku"]} to {self._csv_filename}...')
         self.save_columns['Наименование'] = self.product['name']
         self.save_columns['ID артикула'] = self.__sku_code
-        self.save_columns['Код артикула'] = f"{self.product['name'][:3]}-{self.__sku_code}"
+        self.save_columns['Код артикула'] = f"{self.product['name']}-{self.__sku_code}-{self.product['sku']}"
         self.save_columns['Наименование артикула'] = self.product['sku']
         self.save_columns['Цена'] = self.product['price']
         self.save_columns['Изображения товаров'] = self.product['img']
@@ -173,22 +173,19 @@ class SiteParser:
         """ Получение следующего артикула товара """
         self.print_r("Getting next product variation...")
         try:
-            sleep(10)
+            sleep(5)
             __size = self.driver.find_elements_by_css_selector("div.size_item ul.size li")
             for __element_size in __size:
-                print(__element_size.text)
                 __element_size.click()
-                sleep(10)
+                sleep(5)
                 __color = self.driver.find_elements_by_css_selector("div.color_item ul.color li")
                 for __element_color in __color:
-                    print(__element_color.find_element_by_css_selector("img").get_attribute("title"))
                     __element_color.click()
-                    sleep(10)
+                    sleep(5)
                     __glass = self.driver.find_elements_by_css_selector("div.glass_item ul.glass li")
                     for __element_glass in __glass:
-                        print(__element_glass.text)
                         __element_glass.click()
-                        sleep(10)
+                        sleep(5)
                         self.__get_data()
         except Exception as error:
             self.print_r(f"{error}", "e")
@@ -208,7 +205,8 @@ class SiteParser:
         try:
             __article = self.driver.find_element_by_css_selector(
                 'div.name-articul span.item-articul span[itemprop="sku"]').text
-            self.product['sku'] = __article.text.split("\xa0")[1]
+            __article = __article[-1:1:-1]
+            self.product['sku'] = __article
         except Exception as error:
             self.print_r(f"{error}", "e")
 
@@ -217,8 +215,8 @@ class SiteParser:
         self.print_r("Getting product glass and color...")
         try:
             __parent = self.driver.find_element_by_css_selector("div.name-articul span.name span")
-            self.product['color'] = (__parent.text.split(", ")[1].split(" ")[0]).capitalize()
-            self.product['glass'] = (__parent.text.split(", ")[0]).capitalize()
+            self.product['color'] = __parent.text.split(", ")[1].capitalize()
+            self.product['glass'] = __parent.text.split(", ")[0].capitalize()
         except Exception as error:
             self.print_r(f"{error}", "e")
 
@@ -242,8 +240,8 @@ class SiteParser:
                 'div.tabs__content.active.clearfix div.option p').text.split("<br>")
             __desc: list = []
             for __child in __parent:
-                if 'Материал' in __child.strip():
-                    self.product['material'] = __child.strip().split(": ")[1]
+                if 'Материал' in __child:
+                    self.product['material'] = __child.split(": ")[2].split("\n")[0]
                 __desc.append(__child.strip())
             self.product['description'] = '. '.join(__desc)
         except Exception as error:
@@ -254,8 +252,7 @@ class SiteParser:
         self.print_r("Getting product image...")
         try:
             sleep(10)
-            __url = 'https://luxor-dveri.ru'
-            self.product['img'] = __url + self.driver.find_element_by_css_selector('div.photo img').get_attribute('src')
+            self.product['img'] = self.driver.find_element_by_css_selector('div.photo img').get_attribute('src')
         except Exception as error:
             self.print_r(f"{error}", "e")
 
