@@ -139,12 +139,11 @@ class SiteParser:
         try:
             sleep(3)
             self.__close_jivo()
-            product_button = self.driver.find_elements_by_css_selector(
+            __parent = self.driver.find_element_by_css_selector(
                 "div.catalog.catalog_list ul")
-            for __product in product_button:
-                __one_product = __product.find_element_by_css_selector("li.catalog_item div div.description a")
-                print(__one_product.text)
-                __one_product.click()
+            __child = __parent.find_elements_by_css_selector("li.catalog_item a")
+            for __product in __child:
+                self.driver.get(__product.get_attribute('href'))
                 self.__get_next_variation()
             else:
                 self.print_r("Products is end on this page!")
@@ -173,16 +172,19 @@ class SiteParser:
     def __get_next_variation(self) -> None:
         """ Получение следующего артикула товара """
         sleep(10)
-        __size = self.driver.find_elements_by_css_selector("div.size_item ul.size li.uf_size")
-        __color = self.driver.find_elements_by_css_selector("div.color_item ul.color li.uf_color")
-        __glass = self.driver.find_elements_by_css_selector("div.glass_item ul.glass li.uf_glass")
+        __size = self.driver.find_elements_by_css_selector("div.size_item ul.size li")
+        __color = self.driver.find_elements_by_css_selector("div.color_item ul.color li")
+        __glass = self.driver.find_elements_by_css_selector("div.glass_item ul.glass li")
         for __element_size in __size:
+            print(__element_size.text)
             __element_size.click()
             sleep(5)
             for __element_color in __color:
+                print(__element_color.text)
                 __element_color.click()
                 sleep(5)
                 for __element_glass in __glass:
+                    print(__element_glass.text)
                     __element_glass.click()
                     sleep(5)
                     self.__get_data()
@@ -245,6 +247,7 @@ class SiteParser:
         """ Получение изображений товара """
         self.print_r("Getting product image...")
         try:
+            sleep(10)
             __url = 'https://luxor-dveri.ru'
             self.product['img'] = __url+self.driver.find_element_by_css_selector('div.photo img').get_attribute('src')
         except Exception as error:
