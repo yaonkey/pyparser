@@ -171,23 +171,27 @@ class SiteParser:
 
     def __get_next_variation(self) -> None:
         """ Получение следующего артикула товара """
-        sleep(10)
-        __size = self.driver.find_elements_by_css_selector("div.size_item ul.size li")
-        __color = self.driver.find_elements_by_css_selector("div.color_item ul.color li")
-        __glass = self.driver.find_elements_by_css_selector("div.glass_item ul.glass li")
-        for __element_size in __size:
-            print(__element_size.text)
-            __element_size.click()
-            sleep(5)
-            for __element_color in __color:
-                print(__element_color.text)
-                __element_color.click()
-                sleep(5)
-                for __element_glass in __glass:
-                    print(__element_glass.text)
-                    __element_glass.click()
-                    sleep(5)
-                    self.__get_data()
+        self.print_r("Getting next product variation...")
+        try:
+            sleep(10)
+            __size = self.driver.find_elements_by_css_selector("div.size_item ul.size li")
+            for __element_size in __size:
+                print(__element_size.text)
+                __element_size.click()
+                sleep(10)
+                __color = self.driver.find_elements_by_css_selector("div.color_item ul.color li")
+                for __element_color in __color:
+                    print(__element_color.find_element_by_css_selector("img").get_attribute("title"))
+                    __element_color.click()
+                    sleep(10)
+                    __glass = self.driver.find_elements_by_css_selector("div.glass_item ul.glass li")
+                    for __element_glass in __glass:
+                        print(__element_glass.text)
+                        __element_glass.click()
+                        sleep(10)
+                        self.__get_data()
+        except Exception as error:
+            self.print_r(f"{error}", "e")
 
     def __get_product_name(self) -> None:
         """ Получение наименование товара """
@@ -202,7 +206,8 @@ class SiteParser:
         """ Получение артикула товара """
         self.print_r("Getting product sku...")
         try:
-            __article = self.driver.find_element_by_css_selector('div.name-articul span.item-articul span[itemprop="sku"]').text
+            __article = self.driver.find_element_by_css_selector(
+                'div.name-articul span.item-articul span[itemprop="sku"]').text
             self.product['sku'] = __article.text.split("\xa0")[1]
         except Exception as error:
             self.print_r(f"{error}", "e")
@@ -223,7 +228,8 @@ class SiteParser:
         try:
             self.product['price'] = self.driver.find_element_by_css_selector("div.cost_set p").text.split(" ")[0]
         except Exception as error:
-            __price = self.driver.find_element_by_css_selector("div.cost_single p span.itog-price").text.split(" руб.")[0]
+            __price = self.driver.find_element_by_css_selector("div.cost_single p span.itog-price").text.split(" руб.")[
+                0]
             __price = __price.replace(" ", "")
             self.product['price'] = __price
             self.print_r(f"{error}", "e")
@@ -249,7 +255,7 @@ class SiteParser:
         try:
             sleep(10)
             __url = 'https://luxor-dveri.ru'
-            self.product['img'] = __url+self.driver.find_element_by_css_selector('div.photo img').get_attribute('src')
+            self.product['img'] = __url + self.driver.find_element_by_css_selector('div.photo img').get_attribute('src')
         except Exception as error:
             self.print_r(f"{error}", "e")
 
