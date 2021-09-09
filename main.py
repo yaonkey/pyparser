@@ -143,6 +143,8 @@ class SiteParser:
         try:
             __name = self.driver.find_element_by_css_selector("div.maincol__i h1").text
             __name = sub(r'\([^()]*\)', '', __name)
+            __name = " ".join(__name.split("  "))
+            __name = " ".join(__name.split(" ")[:-3])
             self.product['name'] = __name.strip()
         except Exception as error:
             self.print_r(f"{error}", "e")
@@ -195,14 +197,16 @@ class SiteParser:
                 __second_child = __first_child.find_elements_by_css_selector("table.char.table_1.table tbody tr")
                 for __third_child in __second_child:
                     __first_element = __third_child.find_element_by_css_selector("th").get_attribute('innerHTML')
-                    __second_element = __third_child.find_element_by_css_selector("td").get_attribute('innerHTML')
-                    __temp_child.append(f"{__first_element}: {__second_element};")
+                    __second_element = __third_child.find_element_by_css_selector("td")
                     if __first_element == "Материал" and __non_material:
-                        self.product['material'] = __second_element
+                        self.product['material'] = __second_element.get_attribute('innerHTML')
                         __non_material = False
                     if __first_element == "Цвет" and __non_color:
-                        self.product['color'] = __second_element
+                        self.product['color'] = __second_element.get_attribute('innerHTML')
                         __non_color = False
+                    if __first_element == "Производитель":
+                        __second_element = __second_element.find_element_by_css_selector("a")
+                    __temp_child.append(f"{__first_element}: {__second_element.get_attribute('innerHTML')};")
             self.product['specs'] = ' '.join(__temp_child)
         except Exception as error:
             self.print_r(f"{error}", "e")
