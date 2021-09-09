@@ -55,7 +55,7 @@ class SiteParser:
         options.add_argument("--disable-setuid-sandbox")
         options.headless = IS_BROWSER_HIDE
         self.driver = webdriver.Firefox(options=options, executable_path=rf'{SELENIUM_PATH}')
-        self._csv_filename = "./data/" + FILENAME + "3.csv"
+        self._csv_filename = "./data/" + FILENAME + ".csv"
         self.__create_columns()
         self.print_r("Load configs...")
         self.__current_iteration: int = 0
@@ -113,7 +113,7 @@ class SiteParser:
     def __process(self) -> None:
         """ Обработчик """
         try:
-            self.__close_jivo()
+            sleep(3)
             self.__get_data()
         except Exception as error:
             self.print_r(f"{error}", "e")
@@ -185,7 +185,6 @@ class SiteParser:
         """ Получение изображений товара """
         self.print_r("Getting product image...")
         try:
-            sleep(10)
             __imgs = self.driver.find_elements_by_css_selector('img.fotorama__img').get_attribute('src')
             self.product['img'] = ', '.join(set(__imgs))
         except Exception as error:
@@ -193,7 +192,15 @@ class SiteParser:
 
     def __get_product_specs(self) -> None:
         """ Получение характеристик продукта """
-        pass
+        __parent = self.driver.find_elements_by_css_selector("div.shift_element.aligned-row div")
+        __temp_child = []
+        for __first_child in __parent:
+            __second_child = __first_child.find_elements_by_css_selector("table.char.table_1.table tbody tr")
+            for __third_child in __second_child:
+                __first_element = __third_child.find_element_by_css_selector("th")
+                __second_element = __third_child.find_element_by_css_selector("td")
+                __temp_child.append(f"{__first_element.text}: {__second_element.text};")
+        self.product['spec'] = ' '.join(__temp_child)
 
     def print_r(self, text: str, print_type: str = "i") -> None:
         """ Кастомный print и logger в одном методе """
