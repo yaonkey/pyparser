@@ -124,11 +124,10 @@ class SiteParser:
             self.__first_iter = False
             self.__get_product_name()
             self.__get_product_sku()
-            self.__get_product_material()
             self.__get_product_price()
             self.__get_product_description()
             self.__get_product_img()
-            self.__get_product_specs()
+            self.__get_product_specs_and_material()
             self.__save()
             self.print_r(
                 f"Product {self.product['name']} added for {self.float_to_fixed(float(time() - self.ttimer), 2)} sec")
@@ -152,16 +151,6 @@ class SiteParser:
         try:
             self.product['sku'] = \
                 self.driver.find_element_by_css_selector('div.maincol__i span.product-id').text.split(": ")[1].strip()
-        except Exception as error:
-            self.print_r(f"{error}", "e")
-
-    def __get_product_material(self) -> None:
-        """ Получение материала продукта """
-        self.print_r("Getting product material...")
-        try:
-            self.product['material'] = \
-                self.driver.find_element_by_css_selector("div.maincol__i h1").text.split('(')[-1].split(")")[
-                    0].capitalize()
         except Exception as error:
             self.print_r(f"{error}", "e")
 
@@ -192,7 +181,7 @@ class SiteParser:
         except Exception as error:
             self.print_r(f"{error}", "e")
 
-    def __get_product_specs(self) -> None:
+    def __get_product_specs_and_material(self) -> None:
         """ Получение характеристик продукта """
         try:
             __parent = self.driver.find_elements_by_css_selector(
@@ -204,6 +193,12 @@ class SiteParser:
                     __first_element = __third_child.find_element_by_css_selector("th").get_attribute('innerHTML')
                     __second_element = __third_child.find_element_by_css_selector("td").get_attribute('innerHTML')
                     __temp_child.append(f"{__first_element}: {__second_element};")
+                    if "Материал" in __first_element:
+                        self.product['material'] = __second_element
+                    elif "Цвет" in __first_element:
+                        self.product['material'] = __second_element
+                    else:
+                        self.product['material'] = "Нет данных"
             self.product['specs'] = ' '.join(__temp_child)
         except Exception as error:
             self.print_r(f"{error}", "e")
