@@ -80,7 +80,6 @@ class SiteParser:
         if url != "":
             self.url = url
         self.driver.get(self.url)
-        self.__sku_code += 1
         self.__process()
 
     def __save(self) -> None:
