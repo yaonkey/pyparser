@@ -133,23 +133,6 @@ class SiteParser:
         except Exception as error:
             self.print_r(f"{error}", "e")
 
-    def __get_next_product_by_click(self) -> None:  # todo: fix me
-        """ Переключение продукта """
-        self.print_r("Getting next product...")
-        try:
-            sleep(3)
-            self.__close_jivo()
-            __parent = self.driver.find_element_by_css_selector(
-                "div.catalog.catalog_list ul")
-            __child = __parent.find_elements_by_css_selector("li.catalog_item a")
-            for __product in __child:
-                self.driver.get(__product.get_attribute('href'))
-                self.__get_next_variation()
-            else:
-                self.print_r("Products is end on this page!")
-        except Exception as error:
-            self.print_r(f"{error}", "e")
-
     def __get_data(self) -> dict:
         """ Получение данных о товаре """
         try:
