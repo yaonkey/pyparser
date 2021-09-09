@@ -160,7 +160,8 @@ class SiteParser:
         self.print_r("Getting product material...")
         try:
             self.product['material'] = \
-                self.driver.find_element_by_css_selector("div.maincol__i h1").text.split('(')[-1].split(")")[0].capitalize()
+                self.driver.find_element_by_css_selector("div.maincol__i h1").text.split('(')[-1].split(")")[
+                    0].capitalize()
         except Exception as error:
             self.print_r(f"{error}", "e")
 
