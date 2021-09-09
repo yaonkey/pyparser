@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import time
-import requests
-from bs4 import BeautifulSoup as bs
+from re import sub
 import csv
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
@@ -141,7 +140,8 @@ class SiteParser:
         """ Получение наименование товара """
         self.print_r("Getting product name...")
         try:
-            __name = self.driver.find_element_by_css_selector("div.maincol__i h1").text.rsplit(" (")[0]
+            __name = self.driver.find_element_by_css_selector("div.maincol__i h1").text
+            __name = sub(r'\([^()]*\)', '', __name)
             self.product['name'] = __name.strip()
         except Exception as error:
             self.print_r(f"{error}", "e")
@@ -160,7 +160,7 @@ class SiteParser:
         self.print_r("Getting product material...")
         try:
             self.product['material'] = \
-                self.driver.find_element_by_css_selector("div.maincol__i h1").text.rsplit(" (")[1].split(")")[0].strip()
+                self.driver.find_element_by_css_selector("div.maincol__i h1").text.split('(')[-1].split(")")[0].capitalize()
         except Exception as error:
             self.print_r(f"{error}", "e")
 
@@ -185,22 +185,27 @@ class SiteParser:
         """ Получение изображений товара """
         self.print_r("Getting product image...")
         try:
-            __imgs = self.driver.find_elements_by_css_selector('img.fotorama__img').get_attribute('src')
-            self.product['img'] = ', '.join(set(__imgs))
+            __imgs = self.driver.find_elements_by_css_selector('img.fotorama__img')
+            __img_list = [img.get_attribute('src') for img in __imgs]
+            self.product['img'] = ', '.join(set(__img_list))
         except Exception as error:
             self.print_r(f"{error}", "e")
 
     def __get_product_specs(self) -> None:
         """ Получение характеристик продукта """
-        __parent = self.driver.find_elements_by_css_selector("div.shift_element.aligned-row div")
-        __temp_child = []
-        for __first_child in __parent:
-            __second_child = __first_child.find_elements_by_css_selector("table.char.table_1.table tbody tr")
-            for __third_child in __second_child:
-                __first_element = __third_child.find_element_by_css_selector("th")
-                __second_element = __third_child.find_element_by_css_selector("td")
-                __temp_child.append(f"{__first_element.text}: {__second_element.text};")
-        self.product['spec'] = ' '.join(__temp_child)
+        try:
+            __parent = self.driver.find_elements_by_css_selector(
+                "div.shift_element.aligned-row div.char-item.limited.item_element.item")
+            __temp_child = []
+            for __first_child in __parent:
+                __second_child = __first_child.find_elements_by_css_selector("table.char.table_1.table tbody tr")
+                for __third_child in __second_child:
+                    __first_element = __third_child.find_element_by_css_selector("th").get_attribute('innerHTML')
+                    __second_element = __third_child.find_element_by_css_selector("td").get_attribute('innerHTML')
+                    __temp_child.append(f"{__first_element}: {__second_element};")
+            self.product['specs'] = ' '.join(__temp_child)
+        except Exception as error:
+            self.print_r(f"{error}", "e")
 
     def print_r(self, text: str, print_type: str = "i") -> None:
         """ Кастомный print и logger в одном методе """
