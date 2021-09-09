@@ -38,6 +38,7 @@ class SiteParser:
         "Дополнительные параметры": "",
         "Изображения товаров": "",
         "Материал": "",
+        "Цвет": "",
         "Тип товаров": PRODUCT_TYPE,
         "Характеристики": "",
     }
@@ -69,8 +70,8 @@ class SiteParser:
         self.product: dict = {
             "name": '',
             "img": "",
-            "color": '',
-            "material": '',
+            "color": 'Нет данных',
+            "material": 'Нет данных',
             "sku": '',
             "price": '',
             'description': '',
@@ -95,6 +96,7 @@ class SiteParser:
         self.save_columns['Изображения товаров'] = self.product['img']
         self.save_columns['Описание'] = self.product['description']
         self.save_columns['Материал'] = self.product['material']
+        self.save_columns['Цвет'] = self.product['color']
         self.save_columns['Характеристики'] = self.product['specs']
 
         # Запись в файл
@@ -127,7 +129,7 @@ class SiteParser:
             self.__get_product_price()
             self.__get_product_description()
             self.__get_product_img()
-            self.__get_product_specs_and_material()
+            self.__get_product_specs()
             self.__save()
             self.print_r(
                 f"Product {self.product['name']} added for {self.float_to_fixed(float(time() - self.ttimer), 2)} sec")
@@ -181,24 +183,26 @@ class SiteParser:
         except Exception as error:
             self.print_r(f"{error}", "e")
 
-    def __get_product_specs_and_material(self) -> None:
+    def __get_product_specs(self) -> None:
         """ Получение характеристик продукта """
         try:
             __parent = self.driver.find_elements_by_css_selector(
                 "div.shift_element.aligned-row div.char-item.limited.item_element.item")
             __temp_child = []
+            __non_material = True
+            __non_color = True
             for __first_child in __parent:
                 __second_child = __first_child.find_elements_by_css_selector("table.char.table_1.table tbody tr")
                 for __third_child in __second_child:
                     __first_element = __third_child.find_element_by_css_selector("th").get_attribute('innerHTML')
                     __second_element = __third_child.find_element_by_css_selector("td").get_attribute('innerHTML')
                     __temp_child.append(f"{__first_element}: {__second_element};")
-                    if "Материал" in __first_element:
+                    if __first_element == "Материал" and __non_material:
                         self.product['material'] = __second_element
-                    elif "Цвет" in __first_element:
-                        self.product['material'] = __second_element
-                    else:
-                        self.product['material'] = "Нет данных"
+                        __non_material = False
+                    if __first_element == "Цвет" and __non_color:
+                        self.product['color'] = __second_element
+                        __non_color = False
             self.product['specs'] = ' '.join(__temp_child)
         except Exception as error:
             self.print_r(f"{error}", "e")
