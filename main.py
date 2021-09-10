@@ -133,7 +133,7 @@ class SiteParser:
         except Exception as error:
             self.print_r(f"{error}", "e")
 
-    def __get_next_product_by_click(self) -> None:  # todo: fix me
+    def __get_next_product_by_click(self) -> None:
         """ Переключение продукта """
         self.print_r("Getting next product...")
         try:

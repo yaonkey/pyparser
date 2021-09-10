@@ -9,16 +9,18 @@ elif os.name == 'posix':
 else:
     SELENIUM_PATH = str(input("Enter path to Selenium: "))
     LOG_PATH = str(input("Enter path for logs: "))
-FILENAME = "luxor-dveri"
+FILENAME = "oniks"
 PRODUCT_TYPE = "Дверь"
 IS_BROWSER_HIDE = True
 SITE_URLS = [
-    ["https://luxor-dveri.ru/catalog/mezhkomnatnye-dveri/?VID=VERTICAL", "Дверь"],
-    ["https://luxor-dveri.ru/catalog/mezhkomnatnye-dveri/?VID=VERTICAL&PAGEN_1=2", "Дверь"],
-    ["https://luxor-dveri.ru/catalog/mezhkomnatnye-dveri/?VID=VERTICAL&PAGEN_1=3", "Дверь"],
-    ["https://luxor-dveri.ru/catalog/mezhkomnatnye-dveri/?VID=VERTICAL&PAGEN_1=4", "Дверь"],
-    ["https://luxor-dveri.ru/catalog/mezhkomnatnye-dveri/?VID=VERTICAL&PAGEN_1=5", "Дверь"],
-    ["https://luxor-dveri.ru/catalog/mezhkomnatnye-dveri/?VID=VERTICAL&PAGEN_1=6", "Дверь"],
+    "https://www.oniks-dveri.ru/catalog/lite/",
+    "https://www.oniks-dveri.ru/catalog/alum/",
+    "https://www.oniks-dveri.ru/catalog/loft/",
+    "https://www.oniks-dveri.ru/catalog/hi-tech/",
+    "https://www.oniks-dveri.ru/catalog/neoclassic/",
+    "https://www.oniks-dveri.ru/catalog/classic/",
+    "https://www.oniks-dveri.ru/catalog/classic-premium/",
+    "https://www.oniks-dveri.ru/catalog/standart/"
 ]
 MAX_PAGE_COUNT = 6
 MAX_PRODUCTS_ON_ONE_PAGE = 28
