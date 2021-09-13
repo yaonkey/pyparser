@@ -9,18 +9,16 @@ elif os.name == 'posix':
 else:
     SELENIUM_PATH = str(input("Enter path to Selenium: "))
     LOG_PATH = str(input("Enter path for logs: "))
-FILENAME = "oniks"
-PRODUCT_TYPE = "Дверь"
+FILENAME = "oniks-pog"
+# PRODUCT_TYPE = "Дверь Оникс"
 IS_BROWSER_HIDE = True
 SITE_URLS = [
-    "https://www.oniks-dveri.ru/catalog/lite/",
-    "https://www.oniks-dveri.ru/catalog/alum/",
-    "https://www.oniks-dveri.ru/catalog/loft/",
-    "https://www.oniks-dveri.ru/catalog/hi-tech/",
-    "https://www.oniks-dveri.ru/catalog/neoclassic/",
-    "https://www.oniks-dveri.ru/catalog/classic/",
-    "https://www.oniks-dveri.ru/catalog/classic-premium/",
-    "https://www.oniks-dveri.ru/catalog/standart/"
+    ["https://www.oniks-dveri.ru/catalog/dvernaya-korobka/", "Погонажные изделия"],
+    ["https://www.oniks-dveri.ru/catalog/nalichnik/", "Погонажные изделия"],
+    ["https://www.oniks-dveri.ru/catalog/kapiteli/", "Погонажные изделия"],
+    ["https://www.oniks-dveri.ru/catalog/podkapitelnye-planki/", "Погонажные изделия"],
+    ["https://www.oniks-dveri.ru/catalog/rozetki/", "Погонажные изделия"],
+    ["https://www.oniks-dveri.ru/catalog/komplekt-dlya-oformleniya-portala/", "Погонажные изделия"],
+    ["https://www.oniks-dveri.ru/catalog/dobor/", "Погонажные изделия"],
+    ["https://www.oniks-dveri.ru/catalog/pritvornaya-planka/", "Погонажные изделия"],
 ]
-MAX_PAGE_COUNT = 6
-MAX_PRODUCTS_ON_ONE_PAGE = 28
