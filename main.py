@@ -38,15 +38,9 @@ class SiteParser:
         "Адрес видео на YouTube или Vimeo": "",
         "Дополнительные параметры": "",
         "Изображения товаров": "",
-        "Цвет": "",
-        "Материал": "",
-        "Высота": "",
-        "Толщина": "",
-        "Ширина": "",
-        "Размер": "",
-        "Открывание": "",
+        "Варианты модели": "",
         "Тип товаров": "",
-        "Остекление": "",
+        "Варианты отделки": "",
     }
     __first_iter = True
 
@@ -72,17 +66,10 @@ class SiteParser:
         self.product: dict = {
             "name": '',
             "img": '',
-            "color": '',
-            "material": '',
-            "height": '',
-            "width": '',
-            "depth": '',
             "sku": '',
             "price": '',
-            'size': '',
-            'opening': '',
-            'description': '',
-            'glass': '',
+            'build': '',
+            'model': '',
         }
         if url != "":
             self.url = url
@@ -99,14 +86,9 @@ class SiteParser:
         self.save_columns['Наименование артикула'] = self.product['sku']
         self.save_columns['Цена'] = self.product['price']
         self.save_columns['Изображения товаров'] = self.product['img']
-        self.save_columns['Описание'] = self.product['description']
         self.save_columns['Тип товаров'] = PRODUCT_TYPE
-        self.save_columns['Открывание'] = self.product["opening"]
-        self.save_columns['Размер'] = self.product['size']
-        self.save_columns['Открывание'] = self.product['opening']
-        self.save_columns['Цвет'] = self.product['color']
-        self.save_columns['Материал'] = self.product['material']
-        self.save_columns['Остекление'] = self.product['glass']
+        self.save_columns['Варианты модели'] = self.product['model']
+        self.save_columns['Варианты отделки'] = self.product['build']
 
         # Запись в файл
         with open(self._csv_filename, "a", encoding='utf8') as csv_file:
@@ -123,21 +105,7 @@ class SiteParser:
     def __process(self) -> None:
         """ Обработчик """
         try:
-            self.__get_next_product()
-        except Exception as error:
-            self.print_r(f"{error}", "e")
-
-    def __get_next_product(self) -> None:
-        """ Переключение продукта """
-        self.print_r("Getting next product...")
-        self.__sku_code = 0
-        try:
-            __parent = self.driver.find_elements_by_css_selector(
-                "div.razdel-wrap div.latest-item")
-            for __child in __parent:
-                self.__product = __child
-                self.__get_data()
-                self.__sku_code += 1
+            self.__get_data()
         except Exception as error:
             self.print_r(f"{error}", "e")
 
@@ -145,13 +113,10 @@ class SiteParser:
         """ Получение данных о товаре """
         try:
             self.ttimer = time()
-            self.__first_iter = False
+            sleep(3)
             self.__get_product_name()
             self.__get_product_price()
-            self.__get_product_img()
-            # self.__get_product_description()
-            self.__get_product_sku()
-            self.__save()
+            self.__click_by_plus()
             self.print_r(
                 f"Product {self.product['name']} added for {self.float_to_fixed(float(time() - self.ttimer), 2)} sec")
         except Exception as error:
@@ -162,7 +127,7 @@ class SiteParser:
         """ Получение наименование товара """
         self.print_r("Getting product name...")
         try:
-            __name = self.__product.find_element_by_css_selector("h4").text
+            __name = self.driver.find_element_by_css_selector("div.card-top-left h1").text
             self.product['name'] = __name.capitalize()
         except Exception as error:
             self.print_r(f"{error}", "e")
@@ -171,7 +136,7 @@ class SiteParser:
         """ Получение артикула товара """
         self.print_r("Getting product sku...")
         try:
-            self.product['sku'] = f"ДВ-{self.product['name'].split(' ')[1][:3]}-{self.__sku_code}".upper()
+            self.product['sku'] = f"{self.product['name'][:3]}-{self.product['model'][:3]}{self.product['build'][:3]}-{self.__sku_code}".upper()
         except Exception as error:
             self.print_r(f"{error}", "e")
 
@@ -179,39 +144,67 @@ class SiteParser:
         """ Получение цены товара """
         self.print_r("Getting product price...")
         try:
-            self.product['price'] = self.__product.find_element_by_css_selector("div.latest-price").text.split("от ")[1].split(" руб")[0]
+            self.product['price'] = self.driver.find_element_by_css_selector("div.card-price p").text.split("от ")[1].split(" руб")[0]
         except Exception as error:
             self.product['price'] = "0"
-            self.print_r(f"{error}", "e")
-
-    def __get_product_description(self) -> None:
-        """ Получение описания товара """
-        self.print_r("Getting product description...")
-        try:
-            __parent = self.driver.find_element_by_css_selector(
-                'div.tabs__content.active.clearfix div.option p').text.split("<br>")
-            __desc: list = []
-            for __child in __parent:
-                if 'Материал' in __child:
-                    self.product['material'] = __child.split(": ")[2].split("\n")[0]
-                __desc.append(__child.strip())
-            self.product['description'] = '. '.join(__desc)
-        except Exception as error:
             self.print_r(f"{error}", "e")
 
     def __get_product_img(self) -> None:
         """ Получение изображений товара """
         self.print_r("Getting product image...")
         try:
-            self.product['img'] = self.__product.find_element_by_css_selector(
-                'div.latest-img img').get_attribute('src')
+            self.product['img'] = self.driver.find_element_by_css_selector(
+                'div.card-img img').get_attribute('src')
         except Exception as error:
             self.print_r(f"{error}", "e")
 
-    def __close_jivo(self) -> None:
+    def __click_by_plus(self) -> None:
+        """ Нажатие на 'плюсик' """
+        self.print_r("Clicking on plus...")
+        try:
+            __button = self.driver.find_element_by_css_selector("div.product-photoes-carousel.carousel-conteiner a.show-more-photoes")
+            __button.click()
+            sleep(4)
+            self.__get_next_model_by_click()
+        except Exception as error:
+            self.print_r(f'{error}', "e")
+
+    def __get_next_model_by_click(self) -> None:
+        """ Получение следующей модели товара """
+        try:
+            self.__sku_code = 0
+            __parent = self.driver.find_elements_by_css_selector("div.product-all-photoes ul li")
+            for __child in __parent:
+                self.__close_messenger()
+                sleep(1)
+                __child.click()
+                self.__sku_code += 1
+                sleep(3)
+                self.__get_product_build()
+                self.__get_product_model()
+                self.__get_product_img()
+                self.__get_product_sku()
+                self.__save()
+        except Exception as error:
+            self.print_r(f"{error}", "e")
+
+    def __get_product_build(self) -> None:
+        """ Получение варианта отделки """
+        try:
+            self.product['build'] = self.driver.find_elements_by_css_selector("div.card-top-left ul.props li")[0].text
+        except Exception as error:
+            self.print_r(f'{error}', "e")
+
+    def __get_product_model(self) -> None:
+        """ Получение модели отделки """
+        try:
+            self.product['model'] = self.driver.find_elements_by_css_selector("div.card-top-left ul.props li")[1].text
+        except Exception as error:
+            self.print_r(f'{error}', "e")
+
+    def __close_messenger(self) -> None:
         """ Закрытие бизнес-мессенджера Jivo """
-        self.driver.execute_script('''$("div.jivo-iframe-container").remove();''')
-        self.driver.execute_script('''$("jdiv").remove();''')
+        self.driver.execute_script('''$("div.online-chat-root.online-chat-root-MeTalk").remove();''')
         sleep(0.5)
 
     def print_r(self, text: str, print_type: str = "i") -> None:
