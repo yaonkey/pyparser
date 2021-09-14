@@ -9,16 +9,20 @@ elif os.name == 'posix':
 else:
     SELENIUM_PATH = str(input("Enter path to Selenium: "))
     LOG_PATH = str(input("Enter path for logs: "))
-FILENAME = "oniks-pere"
+FILENAME = "oniks-furn"
 IS_BROWSER_HIDE = True
 SITE_URLS = [
-    ["https://www.oniks-dveri.ru/catalog/mezhkomnatnye-peregorodki/peregorodka-1/", "Межкомнатные перегородки"],
-    ["https://www.oniks-dveri.ru/catalog/mezhkomnatnye-peregorodki/peregorodka-2/", "Межкомнатные перегородки"],
-    ["https://www.oniks-dveri.ru/catalog/mezhkomnatnye-peregorodki/peregorodka-3/", "Межкомнатные перегородки"],
-    ["https://www.oniks-dveri.ru/catalog/mezhkomnatnye-peregorodki/peregorodka-4/", "Межкомнатные перегородки"],
-    ["https://www.oniks-dveri.ru/catalog/mezhkomnatnye-peregorodki/peregorodka-5/", "Межкомнатные перегородки"],
-    ["https://www.oniks-dveri.ru/catalog/mezhkomnatnye-peregorodki/peregorodka-6/", "Межкомнатные перегородки"],
-    ["https://www.oniks-dveri.ru/catalog/mezhkomnatnye-peregorodki/peregorodka-7/", "Межкомнатные перегородки"],
-    ["https://www.oniks-dveri.ru/catalog/mezhkomnatnye-peregorodki/peregorodka-8/", "Межкомнатные перегородки"],
-    ["https://www.oniks-dveri.ru/catalog/mezhkomnatnye-peregorodki/peregorodka-9/", "Межкомнатные перегородки"],
+    ["https://www.oniks-dveri.ru/catalog/furnitura-morelli/", "Фурнитура"],
+    ["https://www.oniks-dveri.ru/catalog/zamok-santekhnicheskiy/", "Фурнитура"],
+    ["https://www.oniks-dveri.ru/catalog/zamok-pod-tsilindr/", "Фурнитура"],
+    ["https://www.oniks-dveri.ru/catalog/petli/", "Фурнитура"],
+    ["https://www.oniks-dveri.ru/catalog/ruchki/", "Фурнитура"],
+    ["https://www.oniks-dveri.ru/catalog/rigel/", "Фурнитура"],
+    ["https://www.oniks-dveri.ru/catalog/alyuminievaya-kromka/", "Фурнитура"],
+    ["https://www.oniks-dveri.ru/catalog/otboynaya-plastina/", "Фурнитура"],
+    ["https://www.oniks-dveri.ru/catalog/avtoprog/", "Фурнитура"],
+    ["https://www.oniks-dveri.ru/catalog/ventilyatsionnaya-reshetka/", "Фурнитура"],
+    ["https://www.oniks-dveri.ru/catalog/dovodchik/", "Фурнитура"],
+    ["https://www.oniks-dveri.ru/catalog/skrytyy-magnitnyy-upor/", "Фурнитура"],
+    ["https://www.oniks-dveri.ru/catalog/furnitura-dlya-steklyannykh-dverey/", "Фурнитура"],
 ]
