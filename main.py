@@ -8,6 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
+from random import randint
 from time import sleep, time, strftime, gmtime
 from config import *
 import sys
@@ -92,7 +93,13 @@ class SiteParser:
             'description': '',
             'glass': '',
         }
-        self.__sizes = ['550х1900', '600х1900', '600х2000', '700х2000', '800х2000', '900х2000']
+        self.__sizes = {'49': '550х1900',
+                        '50': '600х1900',
+                        '51': '600х2000',
+                        '52': '700х2000',
+                        '53': '800х2000',
+                        '54': '900х2000'
+                        }
         if url != "":
             self.url = url
         self.driver.get(self.url[0])
@@ -101,12 +108,9 @@ class SiteParser:
 
     def __save(self) -> None:
         """ Сохранение в CSV """
-        self.__sku_code += 1
+        self.__sku_code = 1
         self.print_r(f'Saving product sku: {self.product["sku"]} to {self._csv_filename}...')
         self.save_columns['Наименование'] = self.product['name']
-        self.save_columns['ID артикула'] = self.__sku_code
-        self.save_columns['Код артикула'] = f"{self.product['sku']}"
-        self.save_columns['Наименование артикула'] = self.product['sku']
         self.save_columns['Цена'] = self.product['price']
         self.save_columns['Изображения товаров'] = self.product['img']
         self.save_columns['Описание'] = self.product['description']
@@ -117,8 +121,17 @@ class SiteParser:
         self.save_columns['Материал'] = self.product['material']
         self.save_columns['Остекление'] = self.product['glass']
 
-        for _size in self.__sizes:
+        if self.product['sku'] == '':
+            self.product['sku'] = f'{randint(32, 64)}-{randint(200, 1349)}'
+        elif ' ' in self.product['sku']:
+            self.product['sku'] = self.product['sku'].replace(' ', '-')
+
+        for _key, _size in self.__sizes.items():
+            self.__sku_code += 1
             self.save_columns['Размер'] = _size
+            self.save_columns['ID артикула'] = f"{self.product['sku']}-{_key}"
+            self.save_columns['Код артикула'] = f"{self.product['sku']}-{_key}"
+            self.save_columns['Наименование артикула'] = f"{self.product['sku']}-{_key}"
             # Запись в файл
             with open(self._csv_filename, "a", encoding='utf8') as csv_file:
                 csv_writer = csv.writer(csv_file, delimiter=',')
@@ -176,6 +189,7 @@ class SiteParser:
             self.product['sku'] = self.current_product.find_element_by_css_selector(
                 'div.articul-section span').text
         except Exception as error:
+            self.product['sku'] = f'{randint(32, 64)}'
             self.print_r(f"Sku: {error}", "e")
 
     def __get_product_glass_and_color(self) -> None:
