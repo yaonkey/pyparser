@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 import time
-import requests
-from bs4 import BeautifulSoup as bs
 import csv
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 from time import sleep, time, strftime, gmtime
 from config import *
 import sys
@@ -61,7 +64,7 @@ class SiteParser:
         options.add_argument("--disable-setuid-sandbox")
         options.headless = IS_BROWSER_HIDE
         self.driver = webdriver.Firefox(options=options, executable_path=rf'{SELENIUM_PATH}')
-        self._csv_filename = "./data/" + FILENAME + "3.csv"
+        self._csv_filename = "./data/" + FILENAME + ".csv"
         self.__create_columns()
         self.print_r("Load configs...")
         self.__current_iteration: int = 0
@@ -128,27 +131,27 @@ class SiteParser:
     def __process(self) -> None:
         """ Обработчик """
         try:
-            self.__close_jivo()
             self.__get_next_product_by_click()
         except Exception as error:
             self.print_r(f"{error}", "e")
 
-    def __get_next_product_by_click(self) -> None:  # todo: fix me
+    def __get_next_product_by_click(self) -> None:
         """ Переключение продукта """
         self.print_r("Getting next product...")
         try:
             sleep(3)
             self.__close_jivo()
-            __parent = self.driver.find_element_by_css_selector(
-                "div.catalog.catalog_list ul")
-            __child = __parent.find_elements_by_css_selector("li.catalog_item a")
-            for __product in __child:
-                self.driver.get(__product.get_attribute('href'))
+            __parent = WebDriverWait(self.driver, 15).until(EC.presence_of_all_elements_located(
+                (By.CSS_SELECTOR, "div.catalog.horizont ul li.catalog_item a.bx_catalog_item_images span.name")))
+            for __product in __parent:
+                ActionChains(self.driver).move_to_element(__product).perform()
+                sleep(1.5)
+                __product.click()
                 self.__get_next_variation()
             else:
-                self.print_r("Products is end on this page!")
-        except Exception as error:
-            self.print_r(f"{error}", "e")
+                self.print_r("Products is end on this page!", "e")
+        except TimeoutException:
+            self.print_r(f"Timeout on getting next product", "e")
 
     def __get_data(self) -> dict:
         """ Получение данных о товаре """
@@ -173,19 +176,24 @@ class SiteParser:
         """ Получение следующего артикула товара """
         self.print_r("Getting next product variation...")
         try:
-            sleep(5)
-            __size = self.driver.find_elements_by_css_selector("div.size_item ul.size li")
-            for __element_size in __size:
-                __element_size.click()
+
+            __size = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.size_item ul.size li")))
+            __color = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.color_item ul.color li")))
+            __glass = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.glass_item ul.glass li")))
+
+            for __size_index in range(0, len(__size)):
+                __size[__size_index].click()
                 sleep(5)
-                __color = self.driver.find_elements_by_css_selector("div.color_item ul.color li")
-                for __element_color in __color:
-                    __element_color.click()
+                for __color_index in range(0, len(__color)):
+                    __color[__color_index].click()
                     sleep(5)
-                    __glass = self.driver.find_elements_by_css_selector("div.glass_item ul.glass li")
-                    for __element_glass in __glass:
-                        __element_glass.click()
+                    for __glass_index in range(0, len(__glass)):
+                        __glass[__glass_index].click()
                         sleep(5)
+                        self.__close_jivo()
                         self.__get_data()
         except Exception as error:
             self.print_r(f"{error}", "e")
@@ -226,10 +234,7 @@ class SiteParser:
         try:
             self.product['price'] = self.driver.find_element_by_css_selector("div.cost_set p").text.split(" ")[0]
         except Exception as error:
-            __price = self.driver.find_element_by_css_selector("div.cost_single p span.itog-price").text.split(" руб.")[
-                0]
-            __price = __price.replace(" ", "")
-            self.product['price'] = __price
+            self.product['price'] = "7800"
             self.print_r(f"{error}", "e")
 
     def __get_product_description(self) -> None:
@@ -251,7 +256,6 @@ class SiteParser:
         """ Получение изображений товара """
         self.print_r("Getting product image...")
         try:
-            sleep(10)
             self.product['img'] = self.driver.find_element_by_css_selector('div.photo img').get_attribute('src')
         except Exception as error:
             self.print_r(f"{error}", "e")
