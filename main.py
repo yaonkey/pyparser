@@ -161,45 +161,6 @@ class SiteParser:
         except TimeoutException:
             self.print_r(f"Timeout on getting next product", "e")
 
-    def __get_data(self) -> dict:
-        """ Получение данных о товаре """
-        try:
-            self.ttimer = time()
-            self.__first_iter = False
-            self.__get_product_description()
-            self.__get_product_size()
-            self.print_r(
-                f"Product {self.product['name']} added for {self.float_to_fixed(float(time() - self.ttimer), 2)} sec")
-        except Exception as error:
-            self.print_r(f"{error}", "e")
-        return self.product
-
-    def __get_next_variation(self) -> None:
-        """ Получение следующего артикула товара """
-        self.print_r("Getting next product variation...")
-        try:
-
-            __size = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.size_item ul.size li")))
-            __color = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.color_item ul.color li")))
-            __glass = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.glass_item ul.glass li")))
-
-            for __size_index in range(0, len(__size)):
-                __size[__size_index].click()
-                sleep(5)
-                for __color_index in range(0, len(__color)):
-                    __color[__color_index].click()
-                    sleep(5)
-                    for __glass_index in range(0, len(__glass)):
-                        __glass[__glass_index].click()
-                        sleep(5)
-                        self.__close_jivo()
-                        self.__get_data()
-        except Exception as error:
-            self.print_r(f"{error}", "e")
-
     def __get_product_name(self) -> None:
         """ Получение наименование товара """
         self.print_r("Getting product name...")
@@ -231,43 +192,20 @@ class SiteParser:
         """ Получение цены товара """
         self.print_r("Getting product price...")
         try:
-            self.product['price'] = self.current_product.find_element_by_css_selector("div[itemprop='offers'] span.actual_price[itemprop='price']").get_attribute('content')
+            self.product['price'] = self.current_product.find_element_by_css_selector(
+                "div[itemprop='offers'] span.actual_price[itemprop='price']").get_attribute('content')
         except Exception as error:
             self.product['price'] = "7800"
             self.print_r(f"Price: {error}", "e")
-
-    def __get_product_description(self) -> None:
-        """ Получение описания товара """
-        self.print_r("Getting product description...")
-        try:
-            __parent = self.driver.find_element_by_css_selector(
-                'div.tabs__content.active.clearfix div.option p').text.split("<br>")
-            __desc: list = []
-            for __child in __parent:
-                if 'Материал' in __child:
-                    self.product['material'] = __child.split(": ")[2].split("\n")[0]
-                __desc.append(__child.strip())
-            self.product['description'] = '. '.join(__desc)
-        except Exception as error:
-            self.print_r(f"{error}", "e")
 
     def __get_product_img(self) -> None:
         """ Получение изображений товара """
         self.print_r("Getting product image...")
         try:
-            self.product['img'] = self.current_product.find_element_by_css_selector('a div.photo img').get_attribute('src')
+            self.product['img'] = self.current_product.find_element_by_css_selector('a div.photo img').get_attribute(
+                'src')
         except Exception as error:
             self.print_r(f"Img: {error}", "e")
-
-    def __get_product_size(self) -> None:
-        """ Получение размера товара """
-        self.print_r("Getting product size...")
-        try:
-            __parent = self.driver.find_element_by_css_selector(
-                "div.size_item ul.size li.uf_size.active")
-            self.product['size'] = __parent.text
-        except Exception as error:
-            self.print_r(f"{error}", "e")
 
     def __close_jivo(self) -> None:
         """ Закрытие бизнес-мессенджера Jivo """
